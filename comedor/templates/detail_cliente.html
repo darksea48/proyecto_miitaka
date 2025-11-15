@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle Cliente{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0"><i class="fas fa-user"></i> Información del Cliente</h4>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ cliente.nombre }}</h5>
+                    <hr>
+                    <p class="mb-2">
+                        <i class="fas fa-phone"></i> <strong>Teléfono:</strong><br>
+                        {{ cliente.telefono }}
+                    </p>
+                    <p class="mb-2">
+                        <i class="fas fa-envelope"></i> <strong>Email:</strong><br>
+                        {{ cliente.email|default:"No especificado" }}
+                    </p>
+                    <p class="mb-2">
+                        <i class="fas fa-calendar"></i> <strong>Registro:</strong><br>
+                        {{ cliente.fecha_registro|date:"d/m/Y H:i" }}
+                    </p>
+                    {% if cliente.observaciones %}
+                    <p class="mb-2">
+                        <i class="fas fa-comment"></i> <strong>Observaciones:</strong><br>
+                        {{ cliente.observaciones }}
+                    </p>
+                    {% endif %}
+                    
+                    <div class="d-grid gap-2 mt-4">
+                        <a href="{% url 'editar_cliente' cliente.pk %}" class="btn btn-warning">
+                            <i class="fas fa-edit"></i> Editar
+                        </a>
+                        <a href="{% url 'listar_clientes' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Volver
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0"><i class="fas fa-calendar-alt"></i> Reservas</h5>
+                </div>
+                <div class="card-body">
+                    {% if cliente.reservas.all %}
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Mesa</th>
+                                    <th>Personas</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for reserva in cliente.reservas.all|slice:":10" %}
+                                <tr>
+                                    <td>{{ reserva.fecha_reserva|date:"d/m/Y H:i" }}</td>
+                                    <td>Mesa {{ reserva.mesa.numero }}</td>
+                                    <td>{{ reserva.numero_personas }}</td>
+                                    <td><span class="badge bg-{{ reserva.estado }}">{{ reserva.get_estado_display }}</span></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No hay reservas registradas.</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card shadow">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="fas fa-receipt"></i> Pedidos</h5>
+                </div>
+                <div class="card-body">
+                    {% if cliente.pedidos.all %}
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Fecha</th>
+                                    <th>Tipo</th>
+                                    <th>Total</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pedido in cliente.pedidos.all|slice:":10" %}
+                                <tr>
+                                    <td>#{{ pedido.id }}</td>
+                                    <td>{{ pedido.fecha_pedido|date:"d/m/Y H:i" }}</td>
+                                    <td>{{ pedido.get_tipo_pedido_display }}</td>
+                                    <td>${{ pedido.total }}</td>
+                                    <td><span class="badge bg-{{ pedido.estado }}">{{ pedido.get_estado_display }}</span></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No hay pedidos registrados.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

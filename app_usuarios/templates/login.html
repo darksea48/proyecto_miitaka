@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Inicio de Sesión{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Inicio de Sesión</h2>
+    <form method="post" class="mb-3">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary mt-2">Iniciar sesión</button>
+    </form>
+    <p>¿No tienes cuenta? <a href="{% url 'registro' %}" class="btn btn-link">Regístrate</a></p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        $('form div').addClass('form-group mb-3');
+        $('form label').addClass('form-label');
+        $('form input').addClass('form-control');
+    });
+</script>
+{% endblock %}

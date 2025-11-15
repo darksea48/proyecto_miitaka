@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ object|default:"Nueva" }} Mesa{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white py-3">
+                    <h4 class="mb-0 text-center">
+                        <i class="fas fa-chair"></i>
+                        {% if object %}Editar Mesa #{{ object.numero }}{% else %}Nueva Mesa{% endif %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% if form.errors %}
+                            <div class="alert alert-danger">
+                                <strong>Error:</strong> Por favor corrige los errores a continuación.
+                            </div>
+                        {% endif %}
+                        
+                        {{ form.as_p }}
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="{% url 'listar_mesas' %}" class="btn btn-danger">
+                                <i class="bi bi-x"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-save"></i> Guardar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

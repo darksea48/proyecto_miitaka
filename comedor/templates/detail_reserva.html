@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle Reserva #{{ reserva.id }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-warning">
+                    <h4 class="mb-0">
+                        <i class="fas fa-calendar-check"></i> Reserva #{{ reserva.id }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-user"></i> Información del Cliente</h5>
+                            <p>
+                                <strong>Nombre:</strong> {{ reserva.comensal.nombre }}<br>
+                                {% if reserva.comensal.telefono %}
+                                    <strong>Teléfono:</strong> {{ reserva.comensal.telefono }}<br>
+                                {% endif %}
+                                {% if reserva.comensal.email %}
+                                    <strong>Email:</strong> {{ reserva.comensal.email }}
+                                {% endif %}
+                            </p>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-info-circle"></i> Detalles de la Reserva</h5>
+                            <p>
+                                <strong>Mesa:</strong> Mesa {{ reserva.mesa.numero }} ({{ reserva.mesa.ubicacion }})<br>
+                                <strong>Fecha y Hora:</strong> {{ reserva.fecha_reserva|date:"d/m/Y H:i" }}<br>
+                                <strong>Número de Personas:</strong> {{ reserva.numero_personas }}<br>
+                                <strong>Estado:</strong> 
+                                <span class="badge 
+                                    {% if reserva.estado == 'pendiente' %}bg-warning
+                                    {% elif reserva.estado == 'confirmada' %}bg-success
+                                    {% elif reserva.estado == 'en_curso' %}bg-info
+                                    {% elif reserva.estado == 'completada' %}bg-secondary
+                                    {% elif reserva.estado == 'cancelada' %}bg-danger
+                                    {% else %}bg-dark{% endif %}">
+                                    {{ reserva.get_estado_display }}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    {% if reserva.observaciones %}
+                    <hr>
+                    <h5><i class="fas fa-comment"></i> Observaciones</h5>
+                    <p>{{ reserva.observaciones }}</p>
+                    {% endif %}
+                    
+                    <hr>
+                    <p class="text-muted small">
+                        <strong>Creada por:</strong> {{ reserva.creada_por.username|default:"Sistema" }}<br>
+                        <strong>Fecha de creación:</strong> {{ reserva.fecha_creacion|date:"d/m/Y H:i" }}<br>
+                        <strong>Última actualización:</strong> {{ reserva.fecha_actualizacion|date:"d/m/Y H:i" }}
+                    </p>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <a href="{% url 'listar_reservas' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Volver
+                        </a>
+                        <a href="{% url 'editar_reserva' reserva.pk %}" class="btn btn-warning">
+                            <i class="fas fa-edit"></i> Editar
+                        </a>
+                        <a href="{% url 'eliminar_reserva' reserva.pk %}" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

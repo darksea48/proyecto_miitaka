@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle Mesa #{{ mesa.id }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header {% if mesa.estado == 'disponible' %}bg-success {% else %}bg-danger{% endif %} text-white text-center">
+                    <h4 class="mb-0">
+                        <i class="bi bi-table"></i> Mesa #{{ mesa.id }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p>
+                                <strong>Ubicación:</strong> {% if mesa.ubicacion == "salon_principal" %}Salón Principal{% elif mesa.ubicacion == 'terraza' %}Terraza{% elif mesa.ubicacion == 'vip' %}VIP{% elif mesa.ubicacion == 'barra' %}Barra{% else %}Sin ubicación{% endif %}<br>
+                                <strong>Capacidad:</strong> {{ mesa.capacidad }} personas<br>
+                                <strong>Estado:</strong> 
+                                <span class="badge 
+                                    {% if mesa.estado == 'disponible' %}bg-success
+                                    {% elif mesa.estado == 'ocupada' %}bg-danger
+                                    {% elif mesa.estado == 'reservada' %}bg-warning
+                                    {% else %}bg-secondary{% endif %}">
+                                    {{ mesa.get_estado_display }}
+                                </span>
+                            </p>
+                        </div>
+                    </div>                    
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <a href="{% url 'reservar_mesa' mesa.pk %}" class="btn btn-primary">
+                            <i class="fas fa-calendar-plus"></i> Reservar Mesa
+                        </a>
+                        <a href="{% url 'editar_mesa' mesa.pk %}" class="btn btn-warning">
+                            <i class="fas fa-edit"></i> Editar
+                        </a>
+                        <a href="{% url 'eliminar_mesa' mesa.pk %}" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </a>
+                        <a href="{% url 'listar_mesas' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Volver
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

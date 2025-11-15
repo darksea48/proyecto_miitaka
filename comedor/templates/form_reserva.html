@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ object|default:"Nueva" }} Reserva{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-warning">
+                    <h4 class="mb-0 text-center">
+                        <i class="fas fa-calendar-alt"></i>
+                        {% if object %}Editar Reserva #{{ object.id }}{% else %}Nueva Reserva{% endif %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        {% if form.errors %}
+                            <div class="alert alert-danger">
+                                <strong>Error:</strong> Por favor corrige los errores a continuación.
+                            </div>
+                        {% endif %}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.cliente.id_for_label }}" class="form-label">
+                                    <i class="fas fa-user"></i> {{ form.cliente.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.cliente }}
+                                {% if form.cliente.errors %}
+                                    <div class="text-danger small">{{ form.cliente.errors }}</div>
+                                {% endif %}
+                                <small class="form-text text-muted">
+                                    <a href="{% url 'crear_cliente' %}" target="_blank" class="btn btn-outline-success mt-1">+ Agregar nuevo cliente</a>
+                                </small>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.mesa.id_for_label }}" class="form-label">
+                                    <i class="fas fa-chair"></i> {{ form.mesa.label }} <span class="text-danger">*</span>
+                                </label>
+                                
+                                    {{ form.mesa }}
+                                
+                                {% if form.mesa.errors %}
+                                    <div class="text-danger small">{{ form.mesa.errors }}</div>
+                                {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.fecha_reserva.id_for_label }}" class="form-label">
+                                        <i class="fas fa-calendar-day"></i> {{ form.fecha_reserva.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.fecha_reserva }}
+                                    {% if form.fecha_reserva.errors %}
+                                        <div class="text-danger small">{{ form.fecha_reserva.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.numero_personas.id_for_label }}" class="form-label">
+                                        <i class="fas fa-users"></i> {{ form.numero_personas.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.numero_personas }}
+                                    {% if form.numero_personas.errors %}
+                                        <div class="text-danger small">{{ form.numero_personas.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="{{ form.observaciones.id_for_label }}" class="form-label">
+                                    <i class="fas fa-comment"></i> {{ form.observaciones.label }}
+                                </label>
+                                {{ form.observaciones }}
+                                {% if form.observaciones.errors %}
+                                    <div class="text-danger small">{{ form.observaciones.errors }}</div>
+                                {% endif %}
+                            </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="{% url 'listar_reservas' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-save"></i> Guardar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        {% if mesa %}
+            $('#id_mesa').val({{ mesa.id }});
+        {% endif %}
+        {% if cliente %}
+            $('#id_cliente').val({{ cliente.id }});
+        {% endif %}
+        // Filtrar mesas por capacidad
+        $('#id_numero_personas').on('change', function() {
+            var personas = parseInt($(this).val());
+            $('#id_mesa option').each(function() {
+                var mesaText = $(this).text();
+                if (mesaText.includes('personas)')) {
+                    var capacidad = parseInt(mesaText.match(/\((\d+) personas\)/)?.[1] || 0);
+                    if (personas > 0 && capacidad > 0 && capacidad < personas) {
+                        $(this).hide();
+                    } else {
+                        $(this).show();
+                    }
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

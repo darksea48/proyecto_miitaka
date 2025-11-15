@@ -1,0 +1,285 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-utensils"></i> {{ titulo }}</h2>
+        <a href="{{ url_crear }}" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus"></i> {{ texto_boton_crear }}
+        </a>
+    </div>
+    
+    {% if tipo_vista == 'mesas' %}
+    <!-- Vista de Mesas -->
+    <div class="row">
+        {% for mesa in mesas %}
+            <div class="col-sm-4 col-md-3 col-lg-2 mb-4">
+                <a href="{% url 'ver_mesa' mesa.pk %}" class="text-decoration-none">
+                    <div class="card h-100 {% if mesa.estado == 'disponible' %}border-success{% elif mesa.estado == 'ocupada' %}border-danger{% elif mesa.estado == 'reservada' %}border-warning{% else %}border-secondary{% endif %} text-center p-2">
+                        <div class="card-header text-center {% if mesa.estado == 'disponible' %}bg-success text-white{% elif mesa.estado == 'ocupada' %}bg-danger text-white{% elif mesa.estado == 'reservada' %}bg-warning{% else %}bg-secondary text-white{% endif %}">
+                            <h4 class="mb-0"><i class="fas fa-chair"></i> Mesa {{ mesa.numero }}</h4>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">
+                                <span class="badge 
+                                    {% if mesa.estado == 'disponible' %}bg-success
+                                    {% elif mesa.estado == 'ocupada' %}bg-danger
+                                    {% elif mesa.estado == 'reservada' %}bg-warning
+                                    {% else %}bg-secondary{% endif %}">
+                                    {{ mesa.get_estado_display }}
+                                </span>
+                                <div class="row">
+                                    <div class="col-6 fw-bold datos-mesa"><i class="bi bi-people-fill"></i> {{ mesa.capacidad }}</div>
+                                    <div class="col-6 fw-bold datos-mesa"><i class="bi bi-geo-alt"></i> {% if mesa.ubicacion == "salon_principal" %}Salón Principal{% elif mesa.ubicacion == 'terraza' %}Terraza{% elif mesa.ubicacion == 'vip' %}VIP{% elif mesa.ubicacion == 'barra' %}Barra{% else %}Sin ubicación{% endif %}</div>
+                                </div>
+                                {% if mesa.estado == "ocupada" %}
+                                <div class="align-items-center">
+                                    <a href="#" class="btn btn-primary btn-sm mt-2 mb-2">Tomar pedido</a>
+                                </div>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> No hay mesas registradas aún.
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% elif tipo_vista == 'clientes' %}
+    <!-- Vista de Clientes -->
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th><i class="fas fa-user"></i> Nombre</th>
+                    <th><i class="fas fa-phone"></i> Teléfono</th>
+                    <th><i class="fas fa-envelope"></i> Email</th>
+                    <th><i class="fas fa-calendar"></i> Registro</th>
+                    <th><i class="fas fa-cogs"></i> Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cliente in clientes %}
+                    <tr>
+                        <td>{{ cliente.nombre }}</td>
+                        <td>{{ cliente.telefono|default:"Sin teléfono"}}</td>
+                        <td>{{ cliente.email|default:"Sin email" }}</td>
+                        <td>{{ cliente.fecha_registro|date:"d/m/Y" }}</td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'ver_cliente' cliente.pk %}" class="btn btn-sm btn-info" title="Ver"><i class="fas fa-eye"></i></a>
+                                <a href="{% url 'crear_reserva_cliente' cliente.pk %}" class="btn btn-sm btn-success" title="Reservar"><i class="fas fa-calendar-plus"></i></a>
+                                <a href="{% url 'editar_cliente' cliente.pk %}" class="btn btn-sm btn-warning" title="Editar"><i class="fas fa-edit"></i></a>
+                                <a href="{% url 'eliminar_cliente' cliente.pk %}" class="btn btn-sm btn-danger eliminar-item" title="Eliminar"><i class="fas fa-trash"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">No hay clientes registrados.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% elif tipo_vista == 'reservas' %}
+    <!-- Vista de Reservas -->
+    <div class="mb-3">
+        <div class="btn-group" role="group">
+            <a href="?estado=todas" class="btn btn-sm btn-outline-primary {% if not request.GET.estado or request.GET.estado == 'todas' %}active{% endif %}">Todas</a>
+            <a href="?estado=pendiente" class="btn btn-sm btn-outline-warning {% if request.GET.estado == 'pendiente' %}active{% endif %}">Pendientes</a>
+            <a href="?estado=confirmada" class="btn btn-sm btn-outline-success {% if request.GET.estado == 'confirmada' %}active{% endif %}">Confirmadas</a>
+            <a href="?estado=en_curso" class="btn btn-sm btn-outline-info {% if request.GET.estado == 'en_curso' %}active{% endif %}">En Curso</a>
+            <a href="?estado=completada" class="btn btn-sm btn-outline-secondary {% if request.GET.estado == 'completada' %}active{% endif %}">Completadas</a>
+        </div>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th><i class="fas fa-hashtag"></i> #</th>
+                    <th><i class="fas fa-user"></i> Cliente</th>
+                    <th><i class="fas fa-chair"></i> Mesa</th>
+                    <th><i class="fas fa-calendar-alt"></i> Fecha/Hora</th>
+                    <th><i class="fas fa-users"></i> Personas</th>
+                    <th><i class="fas fa-info-circle"></i> Estado</th>
+                    <th><i class="fas fa-cogs"></i> Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for reserva in reservas %}
+                    <tr>
+                        <td>{{ reserva.id }}</td>
+                        <td>{{ reserva.cliente.nombre }}</td>
+                        <td><span class="badge bg-primary">Mesa {{ reserva.mesa.numero }}</span></td>
+                        <td>{{ reserva.fecha_reserva|date:"d/m/Y H:i" }}</td>
+                        <td>{{ reserva.numero_personas }}</td>
+                        <td>
+                            <span class="badge 
+                                {% if reserva.estado == 'pendiente' %}bg-warning
+                                {% elif reserva.estado == 'confirmada' %}bg-success
+                                {% elif reserva.estado == 'en_curso' %}bg-info
+                                {% elif reserva.estado == 'completada' %}bg-secondary
+                                {% elif reserva.estado == 'cancelada' %}bg-danger
+                                {% else %}bg-dark{% endif %}">
+                                {{ reserva.get_estado_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'ver_reserva' reserva.pk %}" class="btn btn-sm btn-info" title="Ver"><i class="fas fa-eye"></i></a>
+                                {% if reserva.estado == 'pendiente' %}
+                                    <a href="{% url 'confirmar_reserva' reserva.pk %}" class="btn btn-sm btn-success" title="Confirmar"><i class="fas fa-check"></i></a>
+                                {% endif %}
+                                <a href="{% url 'editar_reserva' reserva.pk %}" class="btn btn-sm btn-warning" title="Editar"><i class="fas fa-edit"></i></a>
+                                <a href="{% url 'eliminar_reserva' reserva.pk %}" class="btn btn-sm btn-danger eliminar-item" title="Eliminar"><i class="fas fa-trash"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center">No hay reservas registradas.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% elif tipo_vista == 'items' %}
+    <!-- Vista de Items del Menú -->
+    <div class="row">
+        {% for item in items %}
+            <div class="col-sm-6 col-md-4 mb-4">
+                <div class="card h-100">
+                    {% if item.imagen %}
+                        <img src="{{ item.imagen.url }}" class="card-img-top" alt="{{ item.nombre }}" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                        <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <i class="fas fa-utensils fa-3x text-white"></i>
+                        </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ item.nombre }}</h5>
+                        <p class="card-text">{{ item.descripcion|truncatewords:15 }}</p>
+                        <p class="mb-1">
+                            <strong><i class="fas fa-dollar-sign"></i> Precio:</strong> ${{ item.precio }}
+                        </p>
+                        {% if item.categoria %}
+                            <p class="mb-1">
+                                <small class="text-muted"><i class="fas fa-tag"></i> {{ item.categoria.nombre }}</small>
+                            </p>
+                        {% endif %}
+                        <p class="mb-2">
+                            <small><i class="fas fa-clock"></i> {{ item.tiempo_preparacion }} min</small>
+                        </p>
+                        <p>
+                            {% if item.disponible %}
+                                <span class="badge bg-success"><i class="fas fa-check"></i> Disponible</span>
+                            {% else %}
+                                <span class="badge bg-danger"><i class="fas fa-times"></i> No Disponible</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="card-footer">
+                        <div class="btn-group w-100" role="group">
+                            <a href="{% url 'cocina:ver_item' item.pk %}" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a>
+                            <a href="{% url 'cocina:editar_item' item.pk %}" class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></a>
+                            <a href="{% url 'cocina:eliminar_item' item.pk %}" class="btn btn-sm btn-danger eliminar-item"><i class="fas fa-trash"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> No hay items en el menú.
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% elif tipo_vista == 'pedidos' %}
+    <!-- Vista de Pedidos -->
+    <div class="mb-3">
+        <div class="btn-group" role="group">
+            <a href="?estado=todos" class="btn btn-sm btn-outline-primary {% if not request.GET.estado or request.GET.estado == 'todos' %}active{% endif %}">Todos</a>
+            <a href="?estado=pendiente" class="btn btn-sm btn-outline-warning {% if request.GET.estado == 'pendiente' %}active{% endif %}">Pendientes</a>
+            <a href="?estado=en_preparacion" class="btn btn-sm btn-outline-info {% if request.GET.estado == 'en_preparacion' %}active{% endif %}">En Preparación</a>
+            <a href="?estado=listo" class="btn btn-sm btn-outline-success {% if request.GET.estado == 'listo' %}active{% endif %}">Listos</a>
+            <a href="?estado=pagado" class="btn btn-sm btn-outline-secondary {% if request.GET.estado == 'pagado' %}active{% endif %}">Pagados</a>
+        </div>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th><i class="fas fa-hashtag"></i> # Pedido</th>
+                    <th><i class="fas fa-chair"></i> Mesa</th>
+                    <th><i class="fas fa-user"></i> Cliente</th>
+                    <th><i class="fas fa-dollar-sign"></i> Total</th>
+                    <th><i class="fas fa-info-circle"></i> Estado</th>
+                    <th><i class="fas fa-calendar"></i> Fecha</th>
+                    <th><i class="fas fa-cogs"></i> Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pedido in pedidos %}
+                    <tr>
+                        <td><strong>#{{ pedido.id }}</strong></td>
+                        <td>
+                            {% if pedido.mesa %}
+                                <span class="badge bg-primary">Mesa {{ pedido.mesa.numero }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Sin mesa</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ pedido.cliente.nombre|default:"Sin cliente" }}</td>
+                        <td><strong>${{ pedido.total }}</strong></td>
+                        <td>
+                            <span class="badge 
+                                {% if pedido.estado == 'pendiente' %}bg-warning
+                                {% elif pedido.estado == 'en_preparacion' %}bg-info
+                                {% elif pedido.estado == 'listo' %}bg-success
+                                {% elif pedido.estado == 'servido' %}bg-primary
+                                {% elif pedido.estado == 'pagado' %}bg-secondary
+                                {% else %}bg-danger{% endif %}">
+                                {{ pedido.get_estado_display }}
+                            </span>
+                        </td>
+                        <td>{{ pedido.fecha_pedido|date:"d/m/Y H:i" }}</td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'ver_pedido' pedido.pk %}" class="btn btn-sm btn-info" title="Ver"><i class="fas fa-eye"></i></a>
+                                <a href="{% url 'editar_pedido' pedido.pk %}" class="btn btn-sm btn-warning" title="Editar"><i class="fas fa-edit"></i></a>
+                                <a href="{% url 'eliminar_pedido' pedido.pk %}" class="btn btn-sm btn-danger eliminar-item" title="Eliminar"><i class="fas fa-trash"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center">No hay pedidos registrados.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% else %}
+    <!-- Vista genérica por defecto -->
+    <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle"></i> Tipo de vista no especificado.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

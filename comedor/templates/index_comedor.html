@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Módulo de Comedor{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="text-center mb-4">
+                <i class="fas fa-utensils"></i> Módulo de Comedor
+            </h1>
+            <p class="text-center text-muted mb-5">
+                Gestión de mesas, clientes, reservas y pedidos
+            </p>
+        </div>
+    </div>
+    
+    <div class="row justify-content-center">
+        <!-- Gestión de Mesas -->
+        <div class="col-md-6 col-lg-3 mb-4">
+            <a href="{% url 'listar_mesas' %}" class="text-decoration-none">
+                <div class="card text-center shadow card-zoom h-100">
+                    <div class="card-body d-flex flex-column justify-content-center">
+                        <i class="fas fa-chair fa-4x mb-3" style="color: #0d6efd;"></i>
+                        <h3 class="card-title">Mesas</h3>
+                        <p class="card-text text-muted">Gestionar mesas del restaurante</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <!-- Gestión de Clientes -->
+        <div class="col-md-6 col-lg-3 mb-4">
+            <a href="{% url 'listar_clientes' %}" class="text-decoration-none">
+                <div class="card text-center shadow card-zoom h-100">
+                    <div class="card-body d-flex flex-column justify-content-center">
+                        <i class="fas fa-users fa-4x mb-3" style="color: #198754;"></i>
+                        <h3 class="card-title">Clientes</h3>
+                        <p class="card-text text-muted">Registro y gestión de clientes</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <!-- Gestión de Reservas -->
+        <div class="col-md-6 col-lg-3 mb-4">
+            <a href="{% url 'listar_reservas' %}" class="text-decoration-none">
+                <div class="card text-center shadow card-zoom h-100">
+                    <div class="card-body d-flex flex-column justify-content-center">
+                        <i class="fas fa-calendar-check fa-4x mb-3" style="color: #ffc107;"></i>
+                        <h3 class="card-title">Reservas</h3>
+                        <p class="card-text text-muted">Gestionar reservas de mesas</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <!-- Gestión de Pedidos -->
+        <div class="col-md-6 col-lg-3 mb-4">
+            <a href="{% url 'listar_pedidos' %}" class="text-decoration-none">
+                <div class="card text-center shadow card-zoom h-100">
+                    <div class="card-body d-flex flex-column justify-content-center">
+                        <i class="fas fa-receipt fa-4x mb-3" style="color: #dc3545;"></i>
+                        <h3 class="card-title">Pedidos</h3>
+                        <p class="card-text text-muted">Gestionar pedidos y órdenes</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <a href="/" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver al Inicio
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

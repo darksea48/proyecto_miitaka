@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ object|default:"Nuevo" }} Item{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-concierge-bell"></i>
+                        {% if object %}Editar Item{% else %}Registrar Item{% endif %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        {% if form.errors %}
+                            <div class="alert alert-danger">
+                                <strong>Error:</strong> Por favor corrige los errores a continuación.
+                            </div>
+                        {% endif %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.nombre.id_for_label }}" class="form-label">
+                                <i class="fas fa-concierge-bell"></i> {{ form.nombre.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.nombre }}
+                            {% if form.nombre.errors %}
+                                <div class="text-danger small">{{ form.nombre.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.descripcion.id_for_label }}" class="form-label">
+                                <i class="fas fa-align-left"></i> {{ form.descripcion.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.descripcion }}
+                            {% if form.descripcion.errors %}
+                                <div class="text-danger small">{{ form.descripcion.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.categoria.id_for_label }}" class="form-label">
+                                    <i class="fas fa-tag"></i> {{ form.categoria.label }}
+                                </label>
+                                {{ form.categoria }}
+                                {% if form.categoria.errors %}
+                                    <div class="text-danger small">{{ form.categoria.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.precio.id_for_label }}" class="form-label">
+                                    <i class="fas fa-dollar-sign"></i> {{ form.precio.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.precio }}
+                                {% if form.precio.errors %}
+                                    <div class="text-danger small">{{ form.precio.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.tiempo_preparacion.id_for_label }}" class="form-label">
+                                    <i class="fas fa-clock"></i> {{ form.tiempo_preparacion.label }}
+                                </label>
+                                {{ form.tiempo_preparacion }}
+                                {% if form.tiempo_preparacion.errors %}
+                                    <div class="text-danger small">{{ form.tiempo_preparacion.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check mt-4">
+                                    {{ form.disponible }}
+                                    <label class="form-check-label" for="{{ form.disponible.id_for_label }}">
+                                        <i class="fas fa-check-circle"></i> {{ form.disponible.label }}
+                                    </label>
+                                </div>
+                                {% if form.disponible.errors %}
+                                    <div class="text-danger small">{{ form.disponible.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="{% url 'cocina:listar_items' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save"></i> Guardar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

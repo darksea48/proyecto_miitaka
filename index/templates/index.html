@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Main Menu{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="jumbotron text-center">
+        <h1 class="text-center my-5">Mi ITAKA</h1>
+        <p class="lead">Bienvenidos al menú principal del gestor de comedor de tu restaurante. Acá puede gestionar toda la información correspondiente a los comensales y sus reservas.</p>
+    </div>
+    <div class="container">
+        <div class="row justify-content-center text-center mt-5">
+            <div class="col-md-4">
+                <a id="a-comedor" href="{% url 'comedor_index' %}" class="w-100 mb-3 text-decoration-none"><div class="card-zoom card text-white"><span class="material-symbols-outlined">table_restaurant</span> Comedor</div></a>
+            </div>
+            <div class="col-md-4">
+                <a id="a-cocina" href="{% url 'cocina_index' %}" class="w-100 mb-3 text-decoration-none"><div class="card-zoom card text-white"><span class="material-symbols-outlined">chef_hat</span> Cocina</div></a>
+            </div>
+            <div class="col-md-4">
+                <a id="a-caja" href="#" class="w-100 mb-3 text-decoration-none"><div class="card-zoom card text-white"><span class="material-symbols-outlined">point_of_sale</span> Caja</div></a>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+{% endblock %}
