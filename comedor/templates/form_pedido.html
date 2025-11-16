@@ -101,7 +101,7 @@
 {% block scripts %}
 <script>
     $(document).ready(function() {
-        {% if mesa %}
+        {% if mesa %} 
             // Preseleccionar la mesa si viene en el contexto
             $('#id_mesa').val('{{ mesa.id }}');
         {% endif %}
