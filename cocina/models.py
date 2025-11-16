@@ -6,6 +6,7 @@ class CategoriaItem(models.Model):
     """Categorías de items del menú (platos, bebidas, cocteles, etc.)"""
     nombre = models.CharField(max_length=100, unique=True, verbose_name='Nombre')
     descripcion = models.TextField(verbose_name='Descripción', blank=True)
+    lugar_item = models.CharField(max_length=100, choices=[('bar', 'Bar'), ('cocina', 'Cocina')], verbose_name='Proveniencia del Item', default='cocina')
     
     class Meta:
         verbose_name = 'Categoría de Item'

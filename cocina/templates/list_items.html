@@ -6,7 +6,7 @@
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2><i class="fas fa-utensils"></i> {{ titulo }}</h2>
-        <a href="{% url url_crear %}" class="btn btn-success">
+        <a href="{% url 'crear_item' %}" class="btn btn-success">
             <i class="fas fa-plus"></i> {{ texto_boton_crear }}
         </a>
     </div>
@@ -14,7 +14,7 @@
     <!-- Filtros -->
     <div class="mb-3">
         <div class="btn-group" role="group">
-            <a href="{% url 'cocina:listar_items' %}" class="btn btn-sm btn-outline-primary {% if not request.GET.categoria and not request.GET.disponible %}active{% endif %}">Todos</a>
+            <a href="{% url 'listar_items' %}" class="btn btn-sm btn-outline-primary {% if not request.GET.categoria and not request.GET.disponible %}active{% endif %}">Todos</a>
             <a href="?disponible=true" class="btn btn-sm btn-outline-success {% if request.GET.disponible == 'true' %}active{% endif %}">Disponibles</a>
             <a href="?disponible=false" class="btn btn-sm btn-outline-danger {% if request.GET.disponible == 'false' %}active{% endif %}">No Disponibles</a>
         </div>
@@ -23,7 +23,7 @@
     <!-- Vista de Items del Menú -->
     <div class="row">
         {% for item in items %}
-            <div class="col-sm-6 col-md-4 mb-4">
+            <div class="col-sm-4 col-md-3 mb-4">
                 <div class="card h-100">
                     {% if item.imagen %}
                         <img src="{{ item.imagen.url }}" class="card-img-top" alt="{{ item.nombre }}" style="height: 200px; object-fit: cover;">
@@ -36,15 +36,15 @@
                         <h5 class="card-title">{{ item.nombre }}</h5>
                         <p class="card-text">{{ item.descripcion|truncatewords:15 }}</p>
                         <p class="mb-1">
-                            <strong><i class="fas fa-dollar-sign"></i> Precio:</strong> ${{ item.precio }}
+                            <strong><i class="fas fa-dollar-sign me-1"></i>Precio:</strong> ${{ item.precio }}
                         </p>
                         {% if item.categoria %}
                             <p class="mb-1">
-                                <small class="text-muted"><i class="fas fa-tag"></i> {{ item.categoria.nombre }}</small>
+                                <small class="text-muted"><i class="fas fa-tag me-1"></i>{{ item.categoria.nombre }}</small>
                             </p>
                         {% endif %}
                         <p class="mb-2">
-                            <small><i class="fas fa-clock"></i> {{ item.tiempo_preparacion }} min</small>
+                            <small><i class="fas fa-clock me-1"></i>{{ item.tiempo_preparacion }} min</small>
                         </p>
                         <p>
                             {% if item.disponible %}
@@ -56,9 +56,9 @@
                     </div>
                     <div class="card-footer">
                         <div class="btn-group w-100" role="group">
-                            <a href="{% url 'cocina:ver_item' item.pk %}" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a>
-                            <a href="{% url 'cocina:editar_item' item.pk %}" class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></a>
-                            <a href="{% url 'cocina:eliminar_item' item.pk %}" class="btn btn-sm btn-danger eliminar-item"><i class="fas fa-trash"></i></a>
+                            <a href="{% url 'ver_item' item.pk %}" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a>
+                            <a href="{% url 'editar_item' item.pk %}" class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></a>
+                            <a href="{% url 'eliminar_item' item.pk %}" class="btn btn-sm btn-danger eliminar-item"><i class="fas fa-trash"></i></a>
                         </div>
                     </div>
                 </div>

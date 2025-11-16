@@ -12,6 +12,8 @@ urlpatterns = [
     path('mesas/<int:pk>/eliminar/', mesa_delete, name='eliminar_mesa'),
     path('mesas/<int:pk>/', MesaDetailView.as_view(), name='ver_mesa'),
     path('mesas/<int:pk>/reservar/', reservar_mesa, name='reservar_mesa'),
+    path('mesas/<int:pk>/liberar/', liberar_mesa, name='liberar_mesa'),
+    path('mesas/<int:pk>/recepcionar/', recepcionar_mesa, name='recepcionar_mesa'),
     
     # URLs para Clientes
     path('clientes/', ClienteListView.as_view(), name='listar_clientes'),
@@ -28,6 +30,7 @@ urlpatterns = [
     path('reservas/<int:pk>/editar/', ReservaUpdateView.as_view(), name='editar_reserva'),
     path('reservas/<int:pk>/eliminar/', reserva_delete, name='eliminar_reserva'),
     path('reservas/<int:pk>/confirmar/', confirmar_reserva, name='confirmar_reserva'),
+    path('reservas/<int:pk>/cancelar/', reserva_cancel, name='cancelar_reserva'),
     
     # URLs para Pedidos
     path('pedidos/', PedidoListView.as_view(), name='listar_pedidos'),
@@ -35,4 +38,5 @@ urlpatterns = [
     path('pedidos/<int:pk>/', PedidoDetailView.as_view(), name='ver_pedido'),
     path('pedidos/<int:pk>/editar/', PedidoUpdateView.as_view(), name='editar_pedido'),
     path('pedidos/<int:pk>/eliminar/', pedido_delete, name='eliminar_pedido'),
+    path('pedidos/crear/<int:mesa_id>/', crear_pedido_mesa, name='crear_pedido_mesa'),
 ]

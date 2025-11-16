@@ -61,19 +61,56 @@
                     </p>
                     
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        {% if reserva.estado == 'pendiente' %}
+                        <a href="{% url 'confirmar_reserva' reserva.pk %}" class="btn btn-success">
+                            <i class="fas fa-check"></i> Confirmar Reserva
+                        </a>
+                        {% endif %}
+                        {% if reserva.estado != 'cancelada' %}
+                        <a href="{% url 'cancelar_reserva' reserva.pk %}" class="btn btn-danger" id="btn-cancelarreserva">
+                            <i class="fas fa-times"></i> Cancelar Reserva
+                        </a>
+                        {% endif %}
                         <a href="{% url 'listar_reservas' %}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Volver
                         </a>
+
+                        {% if reserva.estado != 'cancelada' and reserva.estado != 'completada' %}
                         <a href="{% url 'editar_reserva' reserva.pk %}" class="btn btn-warning">
                             <i class="fas fa-edit"></i> Editar
                         </a>
                         <a href="{% url 'eliminar_reserva' reserva.pk %}" class="btn btn-danger">
                             <i class="fas fa-trash"></i> Eliminar
                         </a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        $('#btn-cancelarreserva').on('click', function(e) {
+            e.preventDefault();
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "La reserva será cancelada y la mesa liberada.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, cancelar reserva',
+                cancelButtonText: 'No, mantener reserva'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = $(this).attr('href');
+                }
+            });
+        });
+    });
+</script>
 {% endblock %}

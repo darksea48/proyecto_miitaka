@@ -14,7 +14,7 @@
                     </h4>
                 </div>
                 <div class="card-body">
-                    <form method="post" novalidate>
+                    <form method="post">
                         {% csrf_token %}
                         
                         {% if form.errors %}
@@ -90,7 +90,7 @@
                         </div>
                         
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                            <a href="{% url 'cocina:listar_items' %}" class="btn btn-secondary">
+                            <a href="{% url 'listar_items' %}" class="btn btn-secondary">
                                 <i class="fas fa-times"></i> Cancelar
                             </a>
                             <button type="submit" class="btn btn-success">
@@ -103,4 +103,15 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Inicializar select2 para el campo de categoría
+    $(document).ready(function() {
+        {% if categoria %}
+            $('#{{ form.categoria.auto_id }}').val('{{ categoria.pk }}').trigger('change');
+        {% endif %}
+    });
+</script>
 {% endblock %}

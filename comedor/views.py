@@ -67,6 +67,19 @@ class MesaUpdateView(UpdateView):
         messages.success(self.request, 'Mesa actualizada exitosamente.')
         return super().form_valid(form)
 
+def liberar_mesa(request, pk):
+    mesa = get_object_or_404(Mesa, pk=pk) # -> SELECT * FROM comedor_mesa WHERE id = pk LIMIT 1
+    
+    if mesa.estado != 'ocupada':
+        messages.error(request, f'La mesa {mesa.numero} no está ocupada. Estado actual: {mesa.get_estado_display()}')
+        return redirect('listar_mesas')
+    
+    # Cambiar el estado de la mesa a disponible
+    mesa.estado = 'disponible'
+    mesa.save() # -> UPDATE comedor_mesa SET estado = 'disponible' WHERE id = pk
+    
+    messages.success(request, f'Mesa {mesa.numero} liberada exitosamente. Ahora está disponible.')
+    return redirect('listar_mesas')
 
 def mesa_delete(request, pk):
     # SELECT * FROM comedor_mesa WHERE id = pk LIMIT 1
@@ -80,10 +93,35 @@ class MesaDetailView(DetailView):
     model = Mesa
     template_name = 'detail_mesa.html'
     context_object_name = 'mesa'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Buscar la reserva activa asociada a la mesa
+        reserva_activa = Reserva.objects.filter(
+            mesa=self.object,
+            estado__in=['pendiente', 'confirmada', 'en_curso']
+        ).first()
+        
+        # Buscar si hay un pedido activo para esta mesa
+        pedido_activo = Pedido.objects.filter(
+            mesa=self.object,
+            estado__in=['pendiente', 'en_preparacion', 'listo', 'servido']
+        ).first()
+        
+        context['reserva_activa'] = reserva_activa
+        context['pedido_activo'] = pedido_activo
+        return context
 
 def reservar_mesa(request, pk):
     
     mesa = get_object_or_404(Mesa, pk=pk) # -> SELECT * FROM comedor_mesa WHERE id = pk LIMIT 1
+    
+    # Verificar si la mesa está disponible
+    if mesa.estado in ['ocupada', 'mantenimiento']:
+        messages.error(request, f'La mesa no está disponible. Estado actual: {mesa.get_estado_display()}')
+        return redirect('listar_mesas')
+    
     if request.method == 'POST':
         form = ReservaForm(request.POST)
         # Hacer el campo mesa no requerido para que no falle la validación
@@ -91,8 +129,8 @@ def reservar_mesa(request, pk):
             reserva = form.save(commit=False)
             reserva.mesa = mesa
             # reserva.creada_por = request.user
-            reserva.save()
-            messages.success(request, 'Mesa reservada exitosamente.')
+            reserva.save()  # Esto automáticamente cambiará el estado de la mesa a 'reservada'
+            messages.success(request, f'Mesa {mesa.numero} reservada exitosamente. Estado actualizado a: Reservada')
             return redirect('listar_mesas')
         else:
             messages.error(request, 'Por favor, corrige los errores del formulario.')
@@ -106,6 +144,33 @@ def reservar_mesa(request, pk):
         form.fields['mesa'].required = False
     return render(request, 'form_reserva.html', {'form': form, 'mesa': mesa})
 
+def recepcionar_mesa(request, pk):
+    mesa = get_object_or_404(Mesa, pk=pk) # -> SELECT * FROM comedor_mesa WHERE id = pk LIMIT 1
+    
+    if mesa.estado != 'reservada':
+        messages.error(request, f'La mesa {mesa.numero} no está reservada. Estado actual: {mesa.get_estado_display()}')
+        return redirect('listar_mesas')
+    
+    # Buscar la reserva activa (confirmada o pendiente) asociada a la mesa
+    reserva = Reserva.objects.filter(
+        mesa=mesa, 
+        estado__in=['pendiente', 'confirmada']
+    ).first() # -> SELECT * FROM comedor_reserva WHERE mesa_id = mesa.id AND estado IN ('pendiente', 'confirmada') ORDER BY fecha_reserva LIMIT 1
+    
+    if not reserva:
+        messages.error(request, f'No se encontró una reserva activa para la mesa {mesa.numero}.')
+        return redirect('listar_mesas')
+    
+    # Cambiar el estado de la mesa a ocupada
+    mesa.estado = 'ocupada'
+    mesa.save() # -> UPDATE comedor_mesa SET estado = 'ocupada' WHERE id = pk
+    
+    # Cambiar el estado de la reserva a en_curso
+    reserva.estado = 'en_curso'
+    reserva.save() # -> UPDATE comedor_reserva SET estado = 'en_curso' WHERE id = reserva.id
+    
+    messages.success(request, f'Mesa {mesa.numero} recepcionada exitosamente. Cliente: {reserva.cliente.nombre}. Ahora está ocupada.')
+    return redirect('listar_mesas')
 
 # ============================================
 # VISTAS PARA CLIENTES
@@ -181,9 +246,19 @@ def crear_reserva_cliente(request, pk):
         if form.is_valid():
             reserva = form.save(commit=False)
             reserva.cliente = cliente
+            mesa = form.cleaned_data.get('mesa')
+            
+            # Validar disponibilidad de la mesa
+            if mesa and mesa.estado in ['ocupada', 'mantenimiento']:
+                messages.error(request, f'La mesa {mesa.numero} no está disponible. Estado actual: {mesa.get_estado_display()}')
+                form = ReservaForm(initial={'cliente': cliente})
+                form.fields['cliente'].widget.attrs['disabled'] = True
+                form.fields['cliente'].required = False
+                return render(request, 'form_reserva.html', {'form': form, 'cliente': cliente})
+            
             # reserva.creada_por = request.user
-            reserva.save() # -> INSERT INTO comedor_reserva (...) VALUES (...)
-            messages.success(request, 'Reserva creada exitosamente para el cliente.')
+            reserva.save() # -> INSERT INTO comedor_reserva (...) VALUES (...) y actualiza estado de mesa
+            messages.success(request, f'Reserva creada exitosamente para el cliente. Mesa {mesa.numero} reservada.')
             return redirect('ver_cliente', pk=cliente.pk)
         else:
             messages.error(request, 'Por favor, corrige los errores del formulario.')
@@ -239,9 +314,17 @@ class ReservaCreateView(CreateView):
     success_url = reverse_lazy('listar_reservas')
     
     def form_valid(self, form):
-        form.instance.creada_por = self.request.user
-        messages.success(self.request, 'Reserva creada exitosamente.')
-        return super().form_valid(form)
+        # form.instance.creada_por = self.request.user
+        mesa = form.cleaned_data.get('mesa')
+        
+        # Validar que la mesa esté disponible
+        if mesa and mesa.estado in ['ocupada', 'mantenimiento']:
+            messages.error(self.request, f'La mesa {mesa.numero} no está disponible. Estado actual: {mesa.get_estado_display()}')
+            return self.form_invalid(form)
+        
+        response = super().form_valid(form)
+        messages.success(self.request, f'Reserva creada exitosamente. Mesa {mesa.numero} actualizada a estado: Reservada')
+        return response
 
 
 class ReservaUpdateView(UpdateView):
@@ -254,13 +337,38 @@ class ReservaUpdateView(UpdateView):
         messages.success(self.request, 'Reserva actualizada exitosamente.')
         return super().form_valid(form)
 
+def reserva_cancel(request, pk):
+    # SELECT * FROM comedor_reserva WHERE id = pk LIMIT 1
+    reserva = get_object_or_404(Reserva, pk=pk)
+    mesa = reserva.mesa
+    
+    reserva.cancel() # Esto actualizará el estado de la reserva y posiblemente el estado de la mesa, lógica realizada en el modelo
+    messages.success(request, f'Reserva cancelada exitosamente. Mesa {mesa.numero} ahora está disponible si no tiene otras reservas activas.')
+    
+    return redirect('listar_reservas')
 
 def reserva_delete(request, pk):
     # SELECT * FROM comedor_reserva WHERE id = pk LIMIT 1
     reserva = get_object_or_404(Reserva, pk=pk)
+    mesa = reserva.mesa
+    
+    # Verificar si hay otras reservas activas para esta mesa
+    reservas_activas = Reserva.objects.filter(
+        mesa=mesa,
+        estado__in=['pendiente', 'confirmada', 'en_curso']
+    ).exclude(id=reserva.id).exists()
+
     # DELETE FROM comedor_reserva WHERE id = pk
     reserva.delete()
-    messages.success(request, 'Reserva eliminada exitosamente.')
+    
+    # Si no hay más reservas activas, liberar la mesa
+    if not reservas_activas:
+        mesa.estado = 'disponible'
+        mesa.save()
+        messages.success(request, f'Reserva eliminada exitosamente. Mesa {mesa.numero} ahora está disponible.')
+    else:
+        messages.success(request, 'Reserva eliminada exitosamente.')
+    
     return redirect('listar_reservas')
 
 def confirmar_reserva(request, pk):
@@ -268,8 +376,9 @@ def confirmar_reserva(request, pk):
     reserva = get_object_or_404(Reserva, pk=pk)
     reserva.estado = 'confirmada'
     # UPDATE comedor_reserva SET estado = 'confirmada' WHERE id = pk
+    # El método save() del modelo actualizará automáticamente el estado de la mesa
     reserva.save()
-    messages.success(request, 'Reserva confirmada exitosamente.')
+    messages.success(request, f'Reserva confirmada exitosamente. Mesa {reserva.mesa.numero} está reservada.')
     return redirect('listar_reservas')
 
 
@@ -322,10 +431,9 @@ class PedidoCreateView(CreateView):
     success_url = reverse_lazy('listar_pedidos')
     
     def form_valid(self, form):
-        form.instance.atendido_por = self.request.user
+        # form.instance.atendido_por = self.request.user
         messages.success(self.request, 'Pedido creado exitosamente.')
         return super().form_valid(form)
-
 
 class PedidoUpdateView(UpdateView):
     model = Pedido
@@ -345,3 +453,69 @@ def pedido_delete(request, pk):
     pedido.delete()
     messages.success(request, 'Pedido eliminado exitosamente.')
     return redirect('listar_pedidos')
+
+def crear_pedido_mesa(request, mesa_id):
+    mesa = get_object_or_404(Mesa, pk=mesa_id)  # -> SELECT * FROM comedor_mesa WHERE id = mesa_id LIMIT 1
+    
+    # Buscar la reserva en curso asociada a la mesa
+    reserva = Reserva.objects.filter(
+        mesa=mesa, 
+        estado='en_curso'
+    ).first() # -> SELECT * FROM comedor_reserva WHERE mesa_id = mesa_id AND estado = 'en_curso' ORDER BY fecha_reserva LIMIT 1
+    
+    if not reserva:
+        messages.error(request, f'No se encontró una reserva en curso para la mesa {mesa.numero}. Debe recepcionar la mesa primero.')
+        return redirect('listar_mesas')
+    
+    cliente = reserva.cliente  # Obtener el cliente de la reserva
+    
+    # Buscar si ya existe un pedido activo para esta mesa
+    pedido_existente = Pedido.objects.filter(
+        mesa=mesa,
+        estado__in=['pendiente', 'en_preparacion', 'listo', 'servido']
+    ).first() # -> SELECT * FROM comedor_pedido WHERE mesa_id = mesa_id AND estado IN (...) ORDER BY fecha_pedido DESC LIMIT 1
+    
+    if request.method == 'POST':
+        if pedido_existente:
+            # Editar el pedido existente
+            form = PedidoForm(request.POST, instance=pedido_existente)
+        else:
+            # Crear un nuevo pedido
+            form = PedidoForm(request.POST)
+        
+        if form.is_valid():
+            pedido = form.save(commit=False)
+            pedido.mesa = mesa
+            pedido.cliente = cliente
+            # pedido.atendido_por = request.user
+            pedido.save()  # -> INSERT/UPDATE comedor_pedido
+            
+            if pedido_existente:
+                messages.success(request, f'Pedido actualizado exitosamente para la Mesa {mesa.numero} - Cliente: {cliente.nombre}.')
+            else:
+                messages.success(request, f'Pedido creado exitosamente para la Mesa {mesa.numero} - Cliente: {cliente.nombre}.')
+            
+            return redirect('ver_pedido', pk=pedido.pk)
+        else:
+            messages.error(request, 'Por favor, corrige los errores del formulario.')
+    else:
+        if pedido_existente:
+            # Cargar el pedido existente en el formulario
+            form = PedidoForm(instance=pedido_existente)
+            messages.info(request, f'Editando pedido existente #{pedido_existente.id} para esta mesa.')
+        else:
+            # Crear un formulario nuevo
+            form = PedidoForm(initial={'mesa': mesa, 'cliente': cliente})
+        
+        form.fields['mesa'].widget.attrs['disabled'] = True
+        form.fields['mesa'].required = False
+        form.fields['cliente'].widget.attrs['disabled'] = True
+        form.fields['cliente'].required = False
+    
+    return render(request, 'form_pedido.html', {
+        'form': form, 
+        'mesa': mesa, 
+        'cliente': cliente, 
+        'reserva': reserva,
+        'object': pedido_existente  # Para que el template sepa si está editando
+    })

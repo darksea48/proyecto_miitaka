@@ -313,17 +313,88 @@ El sistema incluye un panel de administración completo con:
 - **Mantenibilidad**: Código organizado y fácil de mantener
 - **Reutilización**: Los modelos pueden referenciarse entre módulos
 
-### Funcionalidades Específicas
-1. **Pre-selección de Campos**: Al crear una reserva desde el detalle de una mesa o cliente, el campo correspondiente se pre-selecciona automáticamente y se deshabilita para evitar cambios accidentales
-2. **Validaciones de Negocio**: 
-   - Validación de capacidad: no se puede reservar más personas de las que caben en la mesa
-   - Validación de fecha: no se pueden hacer reservas en fechas pasadas
-   - Errores mostrados específicamente en cada campo afectado
-3. **Filtrado Inteligente**: Las mesas se filtran automáticamente por capacidad al seleccionar número de personas
-4. **Cálculo Automático**: Los totales de pedidos se calculan automáticamente al agregar/modificar detalles
-5. **Estados en Tiempo Real**: Sistema de badges con colores para identificar rápidamente estados
-6. **Historial Completo**: Tracking de fechas de creación y actualización en reservas y pedidos
-7. **Gestión Independiente del Menú**: El módulo cocina puede administrarse sin afectar el comedor
+### Funcionalidades Específicas del Sistema (v1.2)
+
+#### 1. Gestión Automática del Ciclo de Vida de Mesas
+**Flujo Completo:**
+```
+1. Mesa Disponible → Crear Reserva → Mesa Reservada
+2. Mesa Reservada → Recepcionar Cliente → Mesa Ocupada + Reserva En Curso  
+3. Mesa Ocupada → Crear/Editar Pedido → Gestión del pedido
+4. Mesa Ocupada → Liberar Mesa → Mesa Disponible (si no hay más reservas)
+```
+
+**Implementación Inteligente:**
+- El método `save()` del modelo `Reserva` actualiza automáticamente el estado de la mesa
+- Valida si existen otras reservas activas antes de liberar
+- Estados sincronizados entre Mesa ↔ Reserva
+
+#### 2. Pre-selección Inteligente de Campos
+Al navegar desde vistas de detalle, los campos se pre-cargan automáticamente:
+- **Desde detalle de Mesa**: Campo mesa pre-seleccionado y deshabilitado en nueva reserva
+- **Desde detalle de Cliente**: Campo cliente pre-seleccionado y deshabilitado en nueva reserva  
+- **Desde detalle de Categoría**: Categoría pre-seleccionada al agregar nuevo item
+- Campos `disabled` con `required=False` para evitar errores de validación
+
+#### 3. Validaciones de Negocio Avanzadas
+Implementadas con mensajes específicos por campo:
+- **Capacidad de Mesa**: No se puede reservar más personas de las que caben
+- **Fecha Válida**: No se permiten reservas en fechas pasadas
+- **Estado de Mesa**: Validación de disponibilidad antes de reservar
+- **Reserva Activa**: Búsqueda de reserva en curso antes de crear pedido
+- Errores mostrados con `add_error()` en el campo correcto
+
+#### 4. Búsqueda y Vinculación Automática de Reservas
+Las vistas buscan inteligentemente reservas asociadas:
+```python
+# Recepcionar Mesa: busca reserva confirmada
+reserva = Reserva.objects.filter(
+    mesa=mesa, 
+    estado__in=['pendiente', 'confirmada']
+).first()
+
+# Crear Pedido: busca reserva en curso  
+reserva = Reserva.objects.filter(
+    mesa=mesa,
+    estado='en_curso'
+).first()
+
+# Detalle Mesa: muestra reserva actual
+reserva_activa = Reserva.objects.filter(
+    mesa=mesa,
+    estado__in=['pendiente', 'confirmada', 'en_curso']
+).first()
+```
+
+#### 5. Edición Inteligente de Pedidos (Sin Duplicados)
+```python
+# Buscar pedido existente
+pedido_existente = Pedido.objects.filter(
+    mesa=mesa,
+    estado__in=['pendiente', 'en_preparacion', 'listo', 'servido']
+).first()
+
+if pedido_existente:
+    # Editar pedido existente
+    form = PedidoForm(instance=pedido_existente)
+    messages.info(request, f'Editando pedido #{pedido_existente.id}')
+else:
+    # Crear nuevo pedido
+    form = PedidoForm(initial={'mesa': mesa})
+```
+
+**Beneficios:**
+- Previene pedidos duplicados por mesa
+- UI dinámica: botones "Crear" vs "Editar"
+- Experiencia de usuario mejorada
+
+#### 6. Funcionalidades Generales
+1. **Pre-selección de Campos**: Navegación contextual con campos automáticos
+2. **Filtrado Inteligente**: Mesas por capacidad, items por categoría
+3. **Cálculo Automático**: Totales de pedidos calculados en tiempo real
+4. **Estados en Tiempo Real**: Sistema de badges con colores
+5. **Historial Completo**: Tracking de fechas de creación y actualización
+6. **Gestión Independiente**: Módulos cocina y comedor funcionan de forma autónoma pero integrada
 
 ## 🔮 Próximas Funcionalidades
 
@@ -384,6 +455,41 @@ Business Intelligence para la gestión:
 - **Panel de Comandas Digital**: Tablets para meseros
 - **Sistema de Cola de Espera**: Gestión de lista de espera
 - **Notificaciones Push**: Alertas en tiempo real
+
+### ✨ Funcionalidades Destacadas (Nuevas - v1.2)
+
+#### Gestión Inteligente de Estado de Mesas
+El sistema ahora maneja automáticamente el ciclo de vida de las mesas:
+- **Reserva creada/confirmada** → Mesa pasa a estado "Reservada"
+- **Cliente recepcionado** → Mesa pasa a "Ocupada" y reserva a "En Curso"
+- **Reserva cancelada/terminada** → Mesa vuelve a "Disponible" (si no hay otras reservas)
+- Validación automática: verifica otras reservas activas antes de liberar
+
+```python
+# Implementación en modelo Reserva
+def save(self, *args, **kwargs):
+    if self.estado in ['pendiente', 'confirmada']:
+        self.mesa.estado = 'reservada'
+        self.mesa.save()
+    elif self.estado in ['cancelada', 'terminada']:
+        if not hay_otras_reservas_activas:
+            self.mesa.estado = 'disponible'
+            self.mesa.save()
+```
+
+#### Búsqueda Automática de Reservas Activas
+Las vistas ahora buscan inteligentemente la reserva asociada a cada mesa:
+- `recepcionar_mesa()`: Encuentra reserva confirmada para cambiar estados
+- `crear_pedido_mesa()`: Busca reserva en curso para obtener datos del cliente
+- `MesaDetailView`: Muestra información completa de la reserva actual
+
+#### Edición Inteligente de Pedidos
+El sistema previene duplicados y facilita la gestión:
+- Detecta si ya existe un pedido activo para la mesa
+- Si existe: carga el formulario con datos para edición
+- Si no existe: crea un nuevo pedido
+- Botones dinámicos en UI: "Crear Pedido" vs "Editar Pedido"
+- Mensaje informativo: "Editando pedido existente #123"
 
 ### 🤔 Funcionalidades en Evaluación (Posible Versión 3.5)
 Características que podrían incorporarse según necesidades del negocio:

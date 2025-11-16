@@ -125,6 +125,18 @@
 - [x] Badges de colores por estado
 - [x] Validaciones JavaScript en formularios
 - [x] Validaciones de negocio en formularios (clean() con add_error())
+- [x] **Gestión automática de estado de mesas**
+  - [x] Mesa pasa a "reservada" al crear/confirmar reserva
+  - [x] Mesa pasa a "ocupada" al recepcionar cliente
+  - [x] Mesa vuelve a "disponible" al cancelar/eliminar reserva (si no hay otras activas)
+- [x] **Búsqueda de reserva activa en mesa**
+  - [x] Vista `recepcionar_mesa` busca reserva en curso
+  - [x] Vista `crear_pedido_mesa` busca reserva activa
+  - [x] Vista `MesaDetailView` muestra reserva actual
+- [x] **Edición inteligente de pedidos**
+  - [x] Si existe pedido activo, lo edita en lugar de crear nuevo
+  - [x] Detección automática de pedido existente para la mesa
+  - [x] Botones dinámicos según estado (Crear/Editar Pedido)
 
 ---
 
@@ -574,9 +586,33 @@ def get_queryset(self):
 
 ---
 
-**Última actualización**: 13 de Noviembre, 2025
+**Última actualización**: 16 de Noviembre, 2025
 
-### 🎉 Últimas Mejoras Implementadas (13/Nov/2025)
+### 🎉 Últimas Mejoras Implementadas (16/Nov/2025)
+1. ✅ **Gestión automática de estado de mesas según reservas**
+   - Método `save()` en modelo `Reserva` actualiza estado de mesa
+   - Mesa → "reservada" al crear/confirmar reserva
+   - Mesa → "disponible" al cancelar/terminar (si no hay más reservas)
+   - Validación de otras reservas activas antes de liberar mesa
+
+2. ✅ **Búsqueda y vinculación de reservas con mesas**
+   - `recepcionar_mesa()`: Busca reserva activa y cambia estados
+   - `crear_pedido_mesa()`: Busca reserva en curso para obtener cliente
+   - `MesaDetailView`: Muestra información de reserva actual
+   - Validaciones mejoradas con mensajes específicos
+
+3. ✅ **Edición inteligente de pedidos**
+   - `crear_pedido_mesa()` ahora detecta pedido existente
+   - Si existe pedido activo, lo edita en lugar de crear duplicado
+   - Template `detail_mesa.html` muestra botones dinámicos
+   - Mensajes informativos: "Editando pedido existente #X"
+
+4. ✅ **Corrección de nomenclatura en templates**
+   - Cambio de "Platillos" a "Items" en todos los templates
+   - Eliminación de templates duplicados en comedor
+   - Botón "Agregar Item" en categorías con pre-selección
+
+### 🎉 Mejoras Implementadas (13/Nov/2025)
 1. ✅ **Corrección de formularios con campos deshabilitados**
    - Campos `disabled` ahora son `required=False`
    - Valores asignados manualmente en la vista

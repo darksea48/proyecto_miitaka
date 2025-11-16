@@ -37,18 +37,17 @@
                                 </small>
                             </div>
                             
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.mesa.id_for_label }}" class="form-label">
-                                    <i class="fas fa-chair"></i> {{ form.mesa.label }} <span class="text-danger">*</span>
-                                </label>
-                                
-                                    {{ form.mesa }}
-                                
-                                {% if form.mesa.errors %}
-                                    <div class="text-danger small">{{ form.mesa.errors }}</div>
-                                {% endif %}
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.numero_personas.id_for_label }}" class="form-label">
+                                        <i class="fas fa-users"></i> {{ form.numero_personas.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.numero_personas }}
+                                    {% if form.numero_personas.errors %}
+                                        <div class="text-danger small">{{ form.numero_personas.errors }}</div>
+                                    {% endif %}
                                 </div>
-                            </div>
+
+                            
                             
                             <div class="row">
                                 <div class="col-md-6 mb-3">
@@ -62,14 +61,18 @@
                                 </div>
                                 
                                 <div class="col-md-6 mb-3">
-                                    <label for="{{ form.numero_personas.id_for_label }}" class="form-label">
-                                        <i class="fas fa-users"></i> {{ form.numero_personas.label }} <span class="text-danger">*</span>
-                                    </label>
-                                    {{ form.numero_personas }}
-                                    {% if form.numero_personas.errors %}
-                                        <div class="text-danger small">{{ form.numero_personas.errors }}</div>
-                                    {% endif %}
+                                <label for="{{ form.mesa.id_for_label }}" class="form-label">
+                                    <i class="fas fa-chair"></i> {{ form.mesa.label }} <span class="text-danger">*</span>
+                                </label>
+                                
+                                    {{ form.mesa }}
+                                
+                                {% if form.mesa.errors %}
+                                    <div class="text-danger small">{{ form.mesa.errors }}</div>
+                                {% endif %}
                                 </div>
+                            </div>
+                                
                             </div>
                             
                             <div class="mb-3">

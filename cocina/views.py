@@ -63,6 +63,14 @@ class ItemCreateView(CreateView):
     template_name = 'form_item.html'
     success_url = reverse_lazy('listar_items')
     
+    def get_initial(self):
+        """Preseleccionar la categoría si viene en el parámetro GET"""
+        initial = super().get_initial()
+        categoria_id = self.request.GET.get('categoria')
+        if categoria_id:
+            initial['categoria'] = categoria_id
+        return initial
+    
     def form_valid(self, form):
         messages.success(self.request, 'Item creado exitosamente.')
         return super().form_valid(form)
@@ -127,3 +135,19 @@ def categoria_delete(request, pk):
     categoria.delete()
     messages.success(request, 'Categoría eliminada exitosamente.')
     return redirect('listar_categorias')
+
+def agregar_item(request, categoria_pk):
+    categoria = get_object_or_404(CategoriaItem, pk=categoria_pk)
+    if request.method == 'POST':
+        form = ItemForm(request.POST)
+        if form.is_valid():
+            nuevo_item = form.save(commit=False)
+            nuevo_item.categoria = categoria
+            nuevo_item.save()
+            messages.success(request, 'Item agregado a la categoría exitosamente.')
+            return redirect('listar_categorias')
+    else:
+        form = ItemForm(initial={'categoria': categoria})
+        form.fields['categoria'].widget.attrs['disabled'] = True  # Hacer el campo de categoría de solo lectura
+        form.fields['categoria'].required = False  # Evitar validación en el campo deshabilitado
+    return render(request, 'form_item.html', {'form': form, 'categoria': categoria})

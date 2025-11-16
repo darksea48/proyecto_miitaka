@@ -7,7 +7,7 @@
     <div class="row justify-content-center">
         <div class="col-md-10">
             <div class="card shadow">
-                <div class="card-header bg-dark text-white">
+                <div class="card-header bg-dark text-white text-center py-3">
                     <h4 class="mb-0">
                         <i class="fas fa-receipt"></i>
                         {% if object %}Editar Pedido #{{ object.id }}{% else %}Nuevo Pedido{% endif %}
@@ -32,16 +32,16 @@
                                 {% if form.mesa.errors %}
                                     <div class="text-danger small">{{ form.mesa.errors }}</div>
                                 {% endif %}
-                                <small class="form-text text-muted">Opcional para delivery</small>
+                                
                             </div>
                             
                             <div class="col-md-4 mb-3">
-                                <label for="{{ form.comensal.id_for_label }}" class="form-label">
-                                    <i class="fas fa-user"></i> {{ form.comensal.label }}
+                                <label for="{{ form.cliente.id_for_label }}" class="form-label">
+                                    <i class="fas fa-user"></i> {{ form.cliente.label }}
                                 </label>
-                                {{ form.comensal }}
-                                {% if form.comensal.errors %}
-                                    <div class="text-danger small">{{ form.comensal.errors }}</div>
+                                {{ form.cliente }}
+                                {% if form.cliente.errors %}
+                                    <div class="text-danger small">{{ form.cliente.errors }}</div>
                                 {% endif %}
                             </div>
                             
@@ -96,4 +96,15 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        {% if mesa %}
+            // Preseleccionar la mesa si viene en el contexto
+            $('#id_mesa').val('{{ mesa.id }}');
+        {% endif %}
+    });
+</script>
 {% endblock %}
