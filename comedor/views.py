@@ -291,9 +291,13 @@ class ReservaListView(ListView):
         return context
     
     def get_queryset(self):
-        # TODO: Optimizar con select_related('mesa', 'cliente', 'creada_por')
-        # -> SELECT * FROM comedor_reserva ORDER BY fecha_reserva DESC
-        queryset = super().get_queryset()
+        # Optimización con select_related para evitar múltiples consultas
+        # SELECT * FROM comedor_reserva 
+        # INNER JOIN comedor_mesa ON (comedor_reserva.mesa_id = comedor_mesa.id)
+        # INNER JOIN comedor_cliente ON (comedor_reserva.cliente_id = comedor_cliente.id)
+        # INNER JOIN auth_user ON (comedor_reserva.creada_por_id = auth_user.id)
+        # ORDER BY fecha_reserva DESC
+        queryset = Reserva.objects.select_related('mesa', 'cliente', 'creada_por').all()
         estado = self.request.GET.get('estado')
         if estado and estado != 'todas':
             # SELECT * FROM comedor_reserva WHERE estado = %s ORDER BY fecha_reserva DESC
@@ -401,9 +405,13 @@ class PedidoListView(ListView):
         return context
     
     def get_queryset(self):
-        # SELECT * FROM comedor_pedido ORDER BY fecha_pedido DESC LIMIT 20
-        # TODO: Optimizar con select_related('reserva__mesa', 'reserva__cliente', 'atendido_por')
-        queryset = super().get_queryset()
+        # Optimización con select_related para evitar múltiples consultas
+        # SELECT * FROM comedor_pedido 
+        # INNER JOIN comedor_mesa ON (comedor_pedido.mesa_id = comedor_mesa.id)
+        # INNER JOIN comedor_cliente ON (comedor_pedido.cliente_id = comedor_cliente.id)
+        # INNER JOIN auth_user ON (comedor_pedido.atendido_por_id = auth_user.id)
+        # ORDER BY fecha_pedido DESC LIMIT 20
+        queryset = Pedido.objects.select_related('mesa', 'cliente', 'atendido_por').all()
         estado = self.request.GET.get('estado')
         if estado and estado != 'todos':
             # SELECT * FROM comedor_pedido WHERE estado = %s ORDER BY fecha_pedido DESC LIMIT 20
@@ -416,10 +424,18 @@ class PedidoDetailView(DetailView):
     template_name = 'detail_pedido.html'
     context_object_name = 'pedido'
     
+    def get_queryset(self):
+        # Optimización con select_related y prefetch_related
+        # SELECT * FROM comedor_pedido WHERE id = %s
+        # INNER JOIN comedor_mesa ON (comedor_pedido.mesa_id = comedor_mesa.id)
+        # INNER JOIN comedor_cliente ON (comedor_pedido.cliente_id = comedor_cliente.id)
+        # + SELECT * FROM comedor_detallepedido WHERE pedido_id IN (...)
+        # + SELECT * FROM cocina_item WHERE id IN (...)
+        return Pedido.objects.select_related('mesa', 'cliente', 'atendido_por').prefetch_related('detalles__item')
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # SELECT * FROM comedor_detallepedido WHERE pedido_id = pedido.id
-        # TODO: Optimizar con prefetch_related('detalles__item')
+        # Ya optimizado con prefetch_related en get_queryset
         context['detalles'] = self.object.detalles.all()
         return context
 
@@ -518,4 +534,84 @@ def crear_pedido_mesa(request, mesa_id):
         'cliente': cliente, 
         'reserva': reserva,
         'object': pedido_existente  # Para que el template sepa si está editando
+    })
+
+# ============================================
+# VISTAS PARA ITEMS DE PEDIDOS
+# ============================================
+
+def agregar_item_pedido(request, pedido_id):
+    """Vista para agregar items a un pedido existente"""
+    pedido = get_object_or_404(Pedido, pk=pedido_id)  # -> SELECT * FROM comedor_pedido WHERE id = pedido_id LIMIT 1
+    
+    if request.method == 'POST':
+        form = DetallePedidoForm(request.POST)
+        if form.is_valid():
+            detalle = form.save(commit=False)
+            detalle.pedido = pedido
+            detalle.precio_unitario = detalle.item.precio  # Capturar precio actual
+            detalle.save()  # -> INSERT INTO comedor_detallepedido
+            
+            # Recalcular total del pedido
+            pedido.calcular_total()
+            
+            messages.success(request, f'Item "{detalle.item.nombre}" agregado al pedido.')
+            return redirect('ver_pedido', pk=pedido.pk)
+        else:
+            messages.error(request, 'Por favor, corrige los errores del formulario.')
+    else:
+        form = DetallePedidoForm()
+    
+    return render(request, 'agregar_item_pedido.html', {
+        'form': form,
+        'pedido': pedido
+    })
+
+
+def editar_item_pedido(request, detalle_id):
+    """Vista para editar un item del pedido"""
+    detalle = get_object_or_404(DetallePedido, pk=detalle_id)  # -> SELECT * FROM comedor_detallepedido WHERE id = detalle_id LIMIT 1
+    pedido = detalle.pedido
+    
+    if request.method == 'POST':
+        form = DetallePedidoForm(request.POST, instance=detalle)
+        if form.is_valid():
+            detalle = form.save(commit=False)
+            detalle.precio_unitario = detalle.item.precio  # Actualizar precio
+            detalle.save()  # -> UPDATE comedor_detallepedido
+            
+            # Recalcular total del pedido
+            pedido.calcular_total()
+            
+            messages.success(request, f'Item actualizado exitosamente.')
+            return redirect('ver_pedido', pk=pedido.pk)
+        else:
+            messages.error(request, 'Por favor, corrige los errores del formulario.')
+    else:
+        form = DetallePedidoForm(instance=detalle)
+    
+    return render(request, 'agregar_item_pedido.html', {
+        'form': form,
+        'pedido': pedido,
+        'detalle': detalle
+    })
+
+def eliminar_item_pedido(request, detalle_id):
+    """Vista para eliminar un item del pedido"""
+    detalle = get_object_or_404(DetallePedido, pk=detalle_id)  # -> SELECT * FROM comedor_detallepedido WHERE id = detalle_id LIMIT 1
+    pedido = detalle.pedido
+    
+    if request.method == 'POST':
+        item_nombre = detalle.item.nombre
+        detalle.delete()  # -> DELETE FROM comedor_detallepedido WHERE id = detalle_id
+        
+        # Recalcular total del pedido
+        pedido.calcular_total()
+        
+        messages.success(request, f'Item "{item_nombre}" eliminado del pedido.')
+        return redirect('ver_pedido', pk=pedido.pk)
+    
+    return render(request, 'confirmar_eliminar_item.html', {
+        'detalle': detalle,
+        'pedido': pedido
     })

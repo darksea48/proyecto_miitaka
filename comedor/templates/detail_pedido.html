@@ -83,8 +83,11 @@
         
         <div class="col-md-8">
             <div class="card shadow">
-                <div class="card-header bg-primary text-white">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-utensils"></i> Detalles del Pedido</h5>
+                    <a href="{% url 'agregar_item_pedido' pedido.pk %}" class="btn btn-sm btn-light">
+                        <i class="fas fa-plus"></i> Agregar Item
+                    </a>
                 </div>
                 <div class="card-body">
                     {% if detalles %}
@@ -97,6 +100,7 @@
                                     <th class="text-end">Precio Unit.</th>
                                     <th class="text-end">Subtotal</th>
                                     <th>Notas</th>
+                                    <th class="text-center">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -114,6 +118,16 @@
                                     <td>
                                         <small class="text-muted">{{ detalle.observaciones|default:"—" }}</small>
                                     </td>
+                                    <td class="text-center">
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a href="{% url 'editar_item_pedido' detalle.id %}" class="btn btn-warning" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{% url 'eliminar_item_pedido' detalle.id %}" class="btn btn-danger" id="btn-eliminaritemdetalle" title="Eliminar">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </a>
+                                        </div>
+                                    </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -121,7 +135,7 @@
                                 <tr class="table-success">
                                     <td colspan="3" class="text-end"><strong>TOTAL:</strong></td>
                                     <td class="text-end"><strong>${{ pedido.total }}</strong></td>
-                                    <td></td>
+                                    <td colspan="2"></td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -130,10 +144,39 @@
                     <div class="alert alert-info">
                         <i class="fas fa-info-circle"></i> No hay items en este pedido aún.
                     </div>
+                    <div class="text-center mt-3">
+                        <a href="{% url 'agregar_item_pedido' pedido.pk %}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Agregar Primer Item
+                        </a>
+                    </div>
                     {% endif %}
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        $('#btn-eliminaritemdetalle').on('click', function(e) {
+            e.preventDefault();
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "¡Esta acción no se puede deshacer!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = $(this).attr('href');
+                }
+            });
+        });
+    });
+</script>
 {% endblock %}

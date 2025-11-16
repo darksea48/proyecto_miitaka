@@ -39,4 +39,10 @@ urlpatterns = [
     path('pedidos/<int:pk>/editar/', PedidoUpdateView.as_view(), name='editar_pedido'),
     path('pedidos/<int:pk>/eliminar/', pedido_delete, name='eliminar_pedido'),
     path('pedidos/crear/<int:mesa_id>/', crear_pedido_mesa, name='crear_pedido_mesa'),
+
+
+    # URLs para Items en Pedidos (DetallePedido)
+    path('pedidos/<int:pedido_id>/agregar-item/', agregar_item_pedido, name='agregar_item_pedido'),
+    path('detalles/<int:detalle_id>/editar/', editar_item_pedido, name='editar_item_pedido'),
+    path('detalles/<int:detalle_id>/eliminar/', eliminar_item_pedido, name='eliminar_item_pedido'),
 ]

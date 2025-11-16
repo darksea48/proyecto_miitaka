@@ -127,9 +127,31 @@ class ReservaForm(forms.ModelForm):
                     'La fecha y hora de la reserva no pueden ser en el pasado.'
                 )
         
-        # TODO: Agregar validación de duplicados
-        # SELECT COUNT(*) FROM comedor_reserva 
-        # WHERE mesa_id = mesa.id AND fecha_reserva = fecha_reserva AND estado != 'cancelada'
+        # Validación de reservas duplicadas (dentro de 2 horas)
+        if mesa and fecha_reserva and not self.add_error:
+            from datetime import timedelta
+            
+            # Buscar reservas en rango de ±2 horas
+            inicio_rango = fecha_reserva - timedelta(hours=2)
+            fin_rango = fecha_reserva + timedelta(hours=2)
+            
+            reservas_conflicto = Reserva.objects.filter(
+                mesa=mesa,
+                fecha_reserva__range=[inicio_rango, fin_rango],
+                estado__in=['pendiente', 'confirmada', 'en_curso']
+            )
+            
+            # Excluir la reserva actual si estamos editando
+            if self.instance.pk:
+                reservas_conflicto = reservas_conflicto.exclude(pk=self.instance.pk)
+            
+            if reservas_conflicto.exists():
+                reserva_existente = reservas_conflicto.first()
+                self.add_error('fecha_reserva',
+                    f'Ya existe una reserva para la mesa {mesa.numero} '
+                    f'cerca de esta hora ({reserva_existente.fecha_reserva.strftime("%d/%m/%Y %H:%M")}). '
+                    f'Por favor, elija otro horario.'
+                )
         
         return cleaned_data
 
@@ -138,12 +160,15 @@ class PedidoForm(forms.ModelForm):
     """Formulario para crear y gestionar pedidos"""
     class Meta:
         model = Pedido
-        fields = ['mesa', 'cliente', 'estado', 'observaciones']
+        fields = ['mesa', 'cliente', 'tipo_pedido', 'estado', 'observaciones']
         widgets = {
             'mesa': forms.Select(attrs={
                 'class': 'form-select'
             }),
             'cliente': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'tipo_pedido': forms.Select(attrs={
                 'class': 'form-select'
             }),
             'estado': forms.Select(attrs={

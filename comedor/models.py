@@ -128,8 +128,15 @@ class Pedido(models.Model):
         ('cancelado', 'Cancelado'),
     ]
     
+    TIPO_CHOICES = [
+        ('comedor', 'Comedor'),
+        ('llevar', 'Para Llevar'),
+        ('delivery', 'Delivery'),
+    ]
+    
     mesa = models.ForeignKey(Mesa, on_delete=models.SET_NULL, null=True, blank=True, related_name='pedidos', verbose_name='Mesa')
     cliente = models.ForeignKey(Cliente, on_delete=models.SET_NULL, null=True, blank=True, related_name='pedidos', verbose_name='Cliente')
+    tipo_pedido = models.CharField(max_length=20, choices=TIPO_CHOICES, default='comedor', verbose_name='Tipo de Pedido')
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='pendiente', verbose_name='Estado')
     observaciones = models.TextField(verbose_name='Observaciones', blank=True)
     total = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Total')
