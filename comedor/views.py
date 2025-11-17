@@ -15,7 +15,7 @@ from .forms import MesaForm, ClienteForm, ReservaForm, PedidoForm, DetallePedido
 # VISTA PRINCIPAL DE COMEDOR
 # ============================================
 
-class ComedorIndexView(TemplateView):
+class ComedorIndexView(LoginRequiredMixin, TemplateView):
     template_name = 'index_comedor.html'
 
 
@@ -23,7 +23,7 @@ class ComedorIndexView(TemplateView):
 # VISTAS PARA MESAS
 # ============================================
 
-class MesaListView(ListView):
+class MesaListView(LoginRequiredMixin, ListView):
     model = Mesa
     template_name = 'list.html'
     context_object_name = 'mesas'
@@ -91,7 +91,7 @@ def mesa_delete(request, pk):
     messages.success(request, 'Mesa eliminada exitosamente.')
     return redirect('listar_mesas')
 
-class MesaDetailView(DetailView):
+class MesaDetailView(LoginRequiredMixin, DetailView):
     model = Mesa
     template_name = 'detail_mesa.html'
     context_object_name = 'mesa'
@@ -180,7 +180,7 @@ def recepcionar_mesa(request, pk):
 # VISTAS PARA CLIENTES
 # ============================================
 
-class ClienteListView(ListView):
+class ClienteListView(LoginRequiredMixin, ListView):
     model = Cliente
     template_name = 'list.html'
     context_object_name = 'clientes'
@@ -206,7 +206,7 @@ class ClienteListView(ListView):
         return queryset
 
 
-class ClienteDetailView(DetailView):
+class ClienteDetailView(LoginRequiredMixin, DetailView):
     model = Cliente
     template_name = 'detail_cliente.html'
     context_object_name = 'cliente'
@@ -282,7 +282,7 @@ def crear_reserva_cliente(request, pk):
 # VISTAS PARA RESERVAS
 # ============================================
 
-class ReservaListView(ListView):
+class ReservaListView(LoginRequiredMixin, ListView):
     model = Reserva
     template_name = 'list.html'
     context_object_name = 'reservas'
@@ -311,7 +311,7 @@ class ReservaListView(ListView):
         return queryset 
 
 
-class ReservaDetailView(DetailView):
+class ReservaDetailView(LoginRequiredMixin, DetailView):
     model = Reserva
     template_name = 'detail_reserva.html'
     context_object_name = 'reserva'
@@ -399,7 +399,7 @@ def confirmar_reserva(request, pk):
 # VISTAS PARA PEDIDOS
 # ============================================
 
-class PedidoListView(ListView):
+class PedidoListView(LoginRequiredMixin, ListView):
     model = Pedido
     template_name = 'list.html'
     context_object_name = 'pedidos'
@@ -428,7 +428,7 @@ class PedidoListView(ListView):
         return queryset
 
 
-class PedidoDetailView(DetailView):
+class PedidoDetailView(LoginRequiredMixin, DetailView):
     model = Pedido
     template_name = 'detail_pedido.html'
     context_object_name = 'pedido'

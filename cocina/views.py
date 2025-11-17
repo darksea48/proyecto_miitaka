@@ -13,7 +13,7 @@ from .forms import CategoriaItemForm, ItemForm
 # VISTA PRINCIPAL DE COCINA
 # ============================================
 
-class CocinaIndexView(TemplateView):
+class CocinaIndexView(LoginRequiredMixin, TemplateView):
     template_name = 'index_cocina.html'
 
 
@@ -21,7 +21,7 @@ class CocinaIndexView(TemplateView):
 # VISTAS PARA ITEMS
 # ============================================
 
-class ItemListView(ListView):
+class ItemListView(LoginRequiredMixin, ListView):
     model = Item
     template_name = 'list_items.html'
     context_object_name = 'items'
@@ -51,7 +51,7 @@ class ItemListView(ListView):
         return queryset
 
 
-class ItemDetailView(DetailView):
+class ItemDetailView(LoginRequiredMixin, DetailView):
     model = Item
     template_name = 'detail_item.html'
     context_object_name = 'item'
@@ -101,7 +101,7 @@ def item_delete(request, pk):
 # VISTAS PARA CATEGORÍAS DE ITEMS
 # ============================================
 
-class CategoriaItemListView(ListView):
+class CategoriaItemListView(LoginRequiredMixin, ListView):
     model = CategoriaItem
     template_name = 'list_categorias.html'
     context_object_name = 'categorias'
