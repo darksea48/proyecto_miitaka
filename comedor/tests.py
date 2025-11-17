@@ -1,7 +1,8 @@
 from django.test import TestCase, Client as TestClient
 from django.urls import reverse
 from django.contrib.auth.models import User
-from datetime import datetime, timedelta
+from django.utils import timezone
+from datetime import timedelta
 from decimal import Decimal
 from .models import Mesa, Cliente, Reserva, Pedido, DetallePedido
 from .forms import MesaForm, ClienteForm, ReservaForm, PedidoForm
@@ -107,7 +108,7 @@ class ReservaModelTest(TestCase):
             username='admin',
             password='admin123'
         )
-        self.fecha_futura = datetime.now() + timedelta(days=2)
+        self.fecha_futura = timezone.now() + timedelta(days=2)
         self.reserva = Reserva.objects.create(
             cliente=self.cliente,
             mesa=self.mesa,
@@ -262,7 +263,7 @@ class ReservaFormTest(TestCase):
     
     def test_formulario_valido(self):
         """Test: Formulario de reserva válido"""
-        fecha_futura = datetime.now() + timedelta(days=1)
+        fecha_futura = timezone.now() + timedelta(days=1)
         form_data = {
             'cliente': self.cliente.id,
             'mesa': self.mesa.id,
@@ -285,17 +286,19 @@ class MesaViewsTest(TestCase):
     def setUp(self):
         """Configuración inicial"""
         self.client = TestClient()
+        self.user = User.objects.create_user(username='testuser', password='password')
+        self.client.login(username='testuser', password='password')
         self.mesa = Mesa.objects.create(numero=1, capacidad=4, ubicacion='salon_principal')
     
     def test_listar_mesas_view(self):
         """Test: Vista de lista de mesas"""
-        response = self.client.get(reverse('listar_mesas'))
+        response = self.client.get(reverse('comedor:listar_mesas'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Mesa 1')
     
     def test_detalle_mesa_view(self):
         """Test: Vista de detalle de mesa"""
-        response = self.client.get(reverse('ver_mesa', args=[self.mesa.pk]))
+        response = self.client.get(reverse('comedor:ver_mesa', args=[self.mesa.pk]))
         self.assertEqual(response.status_code, 200)
         # Verificar que contiene información de la mesa
         self.assertContains(response, 'Mesa')
@@ -303,7 +306,7 @@ class MesaViewsTest(TestCase):
     
     def test_crear_mesa_view_get(self):
         """Test: Vista de creación de mesa (GET)"""
-        response = self.client.get(reverse('crear_mesa'))
+        response = self.client.get(reverse('comedor:crear_mesa'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'form')
 
@@ -314,6 +317,8 @@ class ClienteViewsTest(TestCase):
     def setUp(self):
         """Configuración inicial"""
         self.client = TestClient()
+        self.user = User.objects.create_user(username='testuser', password='password')
+        self.client.login(username='testuser', password='password')
         self.cliente = Cliente.objects.create(
             nombre='Cliente Test',
             telefono='+56955555555'
@@ -321,13 +326,13 @@ class ClienteViewsTest(TestCase):
     
     def test_listar_clientes_view(self):
         """Test: Vista de lista de clientes"""
-        response = self.client.get(reverse('listar_clientes'))
+        response = self.client.get(reverse('comedor:listar_clientes'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Cliente Test')
     
     def test_detalle_cliente_view(self):
         """Test: Vista de detalle de cliente"""
-        response = self.client.get(reverse('ver_cliente', args=[self.cliente.pk]))
+        response = self.client.get(reverse('comedor:ver_cliente', args=[self.cliente.pk]))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Cliente Test')
 
@@ -355,7 +360,7 @@ class IntegracionReservaTest(TestCase):
         self.assertEqual(self.mesa.estado, 'disponible')
         
         # 2. Crear una reserva
-        fecha_futura = datetime.now() + timedelta(days=3)
+        fecha_futura = timezone.now() + timedelta(days=3)
         reserva = Reserva.objects.create(
             cliente=self.cliente,
             mesa=self.mesa,
@@ -375,3 +380,76 @@ class IntegracionReservaTest(TestCase):
         
         # 5. Verificar que aparece en las reservas del cliente
         self.assertIn(reserva, self.cliente.reservas.all())
+
+class ReservaModelLogicTest(TestCase):
+    """Tests para la lógica de negocio en el modelo Reserva"""
+
+    def setUp(self):
+        """Configuración inicial"""
+        self.mesa = Mesa.objects.create(numero=1, capacidad=4, ubicacion='salon_principal')
+        self.cliente = Cliente.objects.create(nombre='Test Cliente')
+        self.user = User.objects.create_user(username='testuser', password='password')
+        self.fecha_reserva_1 = timezone.now() + timedelta(days=1)
+        self.fecha_reserva_2 = timezone.now() + timedelta(days=2)
+
+    def test_crear_reserva_cambia_estado_mesa(self):
+        """Test: Crear una reserva debe cambiar el estado de la mesa a 'reservada'"""
+        self.assertEqual(self.mesa.estado, 'disponible')
+        Reserva.objects.create(
+            cliente=self.cliente,
+            mesa=self.mesa,
+            fecha_reserva=self.fecha_reserva_1,
+            numero_personas=2,
+            creada_por=self.user
+        )
+        self.mesa.refresh_from_db()
+        self.assertEqual(self.mesa.estado, 'reservada')
+
+    def test_cancelar_unica_reserva_libera_mesa(self):
+        """Test: Cancelar la única reserva activa debe liberar la mesa"""
+        reserva = Reserva.objects.create(
+            cliente=self.cliente,
+            mesa=self.mesa,
+            fecha_reserva=self.fecha_reserva_1,
+            numero_personas=2,
+            creada_por=self.user
+        )
+        self.mesa.refresh_from_db()
+        self.assertEqual(self.mesa.estado, 'reservada')
+
+        reserva.cancel()
+        self.mesa.refresh_from_db()
+        self.assertEqual(self.mesa.estado, 'disponible')
+
+    def test_cancelar_reserva_con_otras_activas_no_libera_mesa(self):
+        """Test: Cancelar una reserva cuando hay otras activas no debe liberar la mesa"""
+        reserva1 = Reserva.objects.create(
+            cliente=self.cliente,
+            mesa=self.mesa,
+            fecha_reserva=self.fecha_reserva_1,
+            numero_personas=2,
+            creada_por=self.user,
+            estado='confirmada'
+        )
+        reserva2 = Reserva.objects.create(
+            cliente=self.cliente,
+            mesa=self.mesa,
+            fecha_reserva=self.fecha_reserva_2,
+            numero_personas=3,
+            creada_por=self.user,
+            estado='pendiente'
+        )
+        self.mesa.refresh_from_db()
+        self.assertEqual(self.mesa.estado, 'reservada')
+
+        # Cancelar la primera reserva
+        reserva1.cancel()
+        self.mesa.refresh_from_db()
+
+        # La mesa debe seguir 'reservada' porque reserva2 sigue activa
+        self.assertEqual(self.mesa.estado, 'reservada')
+
+        # Cancelar la segunda reserva debería liberar la mesa
+        reserva2.cancel()
+        self.mesa.refresh_from_db()
+        self.assertEqual(self.mesa.estado, 'disponible')

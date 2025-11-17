@@ -33,10 +33,10 @@
                     {% endif %}
                     
                     <div class="d-grid gap-2 mt-4">
-                        <a href="{% url 'editar_cliente' cliente.pk %}" class="btn btn-warning">
+                        <a href="{% url 'comedor:editar_cliente' cliente.pk %}" class="btn btn-warning">
                             <i class="fas fa-edit"></i> Editar
                         </a>
-                        <a href="{% url 'listar_clientes' %}" class="btn btn-secondary">
+                        <a href="{% url 'comedor:listar_clientes' %}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Volver
                         </a>
                     </div>

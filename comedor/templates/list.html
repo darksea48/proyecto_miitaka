@@ -16,7 +16,7 @@
     <div class="row">
         {% for mesa in mesas %}
             <div class="col-sm-4 col-md-3 col-lg-2 mb-4">
-                <a href="{% url 'ver_mesa' mesa.pk %}" class="text-decoration-none">
+                <a href="{% url 'comedor:ver_mesa' mesa.pk %}" class="text-decoration-none">
                     <div class="card h-100 {% if mesa.estado == 'disponible' %}border-success{% elif mesa.estado == 'ocupada' %}border-danger{% elif mesa.estado == 'reservada' %}border-warning{% else %}border-secondary{% endif %} text-center p-2">
                         <div class="card-header text-center {% if mesa.estado == 'disponible' %}bg-success text-white{% elif mesa.estado == 'ocupada' %}bg-danger text-white{% elif mesa.estado == 'reservada' %}bg-warning{% else %}bg-secondary text-white{% endif %}">
                             <h4 class="mb-0"><i class="fas fa-chair"></i> Mesa {{ mesa.numero }}</h4>
@@ -36,7 +36,7 @@
                                 </div>
                                 {% if mesa.estado == "ocupada" %}
                                 <div class="align-items-center">
-                                    <a href="{% url 'crear_pedido_mesa' mesa.pk %}" class="btn btn-primary btn-sm mt-2 mb-2">Tomar pedido</a>
+                                    <a href="{% url 'comedor:crear_pedido_mesa' mesa.pk %}" class="btn btn-primary btn-sm mt-2 mb-2">Tomar pedido</a>
                                 </div>
                                 {% endif %}
                             </p>
@@ -75,10 +75,10 @@
                         <td>{{ cliente.fecha_registro|date:"d/m/Y" }}</td>
                         <td>
                             <div class="btn-group" role="group">
-                                <a href="{% url 'ver_cliente' cliente.pk %}" class="btn btn-sm btn-info" title="Ver"><i class="fas fa-eye"></i></a>
-                                <a href="{% url 'crear_reserva_cliente' cliente.pk %}" class="btn btn-sm btn-success" title="Reservar"><i class="fas fa-calendar-plus"></i></a>
-                                <a href="{% url 'editar_cliente' cliente.pk %}" class="btn btn-sm btn-warning" title="Editar"><i class="fas fa-edit"></i></a>
-                                <a href="{% url 'eliminar_cliente' cliente.pk %}" class="btn btn-sm btn-danger eliminar-item" title="Eliminar"><i class="fas fa-trash"></i></a>
+                                <a href="{% url 'comedor:ver_cliente' cliente.pk %}" class="btn btn-sm btn-info" title="Ver"><i class="fas fa-eye"></i></a>
+                                <a href="{% url 'comedor:crear_reserva_cliente' cliente.pk %}" class="btn btn-sm btn-success" title="Reservar"><i class="fas fa-calendar-plus"></i></a>
+                                <a href="{% url 'comedor:editar_cliente' cliente.pk %}" class="btn btn-sm btn-warning" title="Editar"><i class="fas fa-edit"></i></a>
+                                <a href="{% url 'comedor:eliminar_cliente' cliente.pk %}" class="btn btn-sm btn-danger eliminar-item" title="Eliminar"><i class="fas fa-trash"></i></a>
                             </div>
                         </td>
                     </tr>
@@ -137,12 +137,12 @@
                         </td>
                         <td>
                             <div class="btn-group" role="group">
-                                <a href="{% url 'ver_reserva' reserva.pk %}" class="btn btn-sm btn-info" title="Ver"><i class="fas fa-eye"></i></a>
+                                <a href="{% url 'comedor:ver_reserva' reserva.pk %}" class="btn btn-sm btn-info" title="Ver"><i class="fas fa-eye"></i></a>
                                 {% if reserva.estado == 'pendiente' %}
-                                    <a href="{% url 'confirmar_reserva' reserva.pk %}" id="-btn-reservaconfirm" class="btn btn-sm btn-success" title="Confirmar"><i class="fas fa-check"></i></a>
+                                    <a href="{% url 'comedor:confirmar_reserva' reserva.pk %}" id="-btn-reservaconfirm" class="btn btn-sm btn-success" title="Confirmar"><i class="fas fa-check"></i></a>
                                 {% endif %}
-                                <a href="{% url 'editar_reserva' reserva.pk %}" class="btn btn-sm btn-warning" title="Editar"><i class="fas fa-edit"></i></a>
-                                <a href="{% url 'eliminar_reserva' reserva.pk %}" class="btn btn-sm btn-danger eliminar-item" title="Eliminar"><i class="fas fa-trash"></i></a>
+                                <a href="{% url 'comedor:editar_reserva' reserva.pk %}" class="btn btn-sm btn-warning" title="Editar"><i class="fas fa-edit"></i></a>
+                                <a href="{% url 'comedor:eliminar_reserva' reserva.pk %}" class="btn btn-sm btn-danger eliminar-item" title="Eliminar"><i class="fas fa-trash"></i></a>
                             </div>
                         </td>
                     </tr>
@@ -260,9 +260,9 @@
                         <td>{{ pedido.fecha_pedido|date:"d/m/Y H:i" }}</td>
                         <td>
                             <div class="btn-group" role="group">
-                                <a href="{% url 'ver_pedido' pedido.pk %}" class="btn btn-sm btn-info" title="Ver"><i class="fas fa-eye"></i></a>
-                                <a href="{% url 'editar_pedido' pedido.pk %}" class="btn btn-sm btn-warning" title="Editar"><i class="fas fa-edit"></i></a>
-                                <a href="{% url 'eliminar_pedido' pedido.pk %}" class="btn btn-sm btn-danger eliminar-item" title="Eliminar"><i class="fas fa-trash"></i></a>
+                                <a href="{% url 'comedor:ver_pedido' pedido.pk %}" class="btn btn-sm btn-info" title="Ver"><i class="fas fa-eye"></i></a>
+                                <a href="{% url 'comedor:editar_pedido' pedido.pk %}" class="btn btn-sm btn-warning" title="Editar"><i class="fas fa-edit"></i></a>
+                                <a href="{% url 'comedor:eliminar_pedido' pedido.pk %}" class="btn btn-sm btn-danger eliminar-item" title="Eliminar"><i class="fas fa-trash"></i></a>
                             </div>
                         </td>
                     </tr>

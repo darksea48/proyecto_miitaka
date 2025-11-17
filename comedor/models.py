@@ -108,15 +108,6 @@ class Reserva(models.Model):
         """Cancela la reserva y actualiza el estado de la mesa si es necesario"""
         self.estado = 'cancelada'
         self.save()
-        # Actualizar el estado de la mesa si es necesario
-        reservas_activas = Reserva.objects.filter( # SELECT COUNT(*) FROM comedor_reserva
-            mesa=self.mesa,
-            estado__in=['pendiente', 'confirmada', 'en_curso']
-        ).exclude(id=self.id).exists()
-        
-        if not reservas_activas:
-            self.mesa.estado = 'disponible'
-            self.mesa.save()
 
 
 class Pedido(models.Model):

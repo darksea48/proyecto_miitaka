@@ -62,24 +62,24 @@
                     
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
                         {% if reserva.estado == 'pendiente' %}
-                        <a href="{% url 'confirmar_reserva' reserva.pk %}" class="btn btn-success">
+                        <a href="{% url 'comedor:confirmar_reserva' reserva.pk %}" class="btn btn-success">
                             <i class="fas fa-check"></i> Confirmar Reserva
                         </a>
                         {% endif %}
                         {% if reserva.estado != 'cancelada' %}
-                        <a href="{% url 'cancelar_reserva' reserva.pk %}" class="btn btn-danger" id="btn-cancelarreserva">
+                        <a href="{% url 'comedor:cancelar_reserva' reserva.pk %}" class="btn btn-danger" id="btn-cancelarreserva">
                             <i class="fas fa-times"></i> Cancelar Reserva
                         </a>
                         {% endif %}
-                        <a href="{% url 'listar_reservas' %}" class="btn btn-secondary">
+                        <a href="{% url 'comedor:listar_reservas' %}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Volver
                         </a>
 
                         {% if reserva.estado != 'cancelada' and reserva.estado != 'completada' %}
-                        <a href="{% url 'editar_reserva' reserva.pk %}" class="btn btn-warning">
+                        <a href="{% url 'comedor:editar_reserva' reserva.pk %}" class="btn btn-warning">
                             <i class="fas fa-edit"></i> Editar
                         </a>
-                        <a href="{% url 'eliminar_reserva' reserva.pk %}" class="btn btn-danger">
+                        <a href="{% url 'comedor:eliminar_reserva' reserva.pk %}" class="btn btn-danger">
                             <i class="fas fa-trash"></i> Eliminar
                         </a>
                         {% endif %}

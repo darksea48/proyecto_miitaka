@@ -55,42 +55,42 @@
                     
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
                         {% if mesa.estado == 'disponible' %}
-                        <a href="{% url 'reservar_mesa' mesa.pk %}" class="btn btn-primary">
+                        <a href="{% url 'comedor:reservar_mesa' mesa.pk %}" class="btn btn-primary">
                             <i class="fas fa-calendar-plus"></i> Reservar Mesa
                         </a>
                         {% elif mesa.estado == 'reservada' %}
                         {% if reserva_activa %}
-                        <a href="{% url 'ver_reserva' reserva_activa.pk %}" class="btn btn-primary">
+                        <a href="{% url 'comedor:ver_reserva' reserva_activa.pk %}" class="btn btn-primary">
                             <i class="fas fa-eye"></i> Ver Reserva
                         </a>
                         {% endif %}
-                        <a href="{% url 'recepcionar_mesa' mesa.pk %}" class="btn btn-success">
+                        <a href="{% url 'comedor:recepcionar_mesa' mesa.pk %}" class="btn btn-success">
                             <i class="fas fa-user-check"></i> Recepcionar Cliente
                         </a>
                         {% elif mesa.estado == 'ocupada' %}
                         {% if pedido_activo %}
-                        <a href="{% url 'ver_pedido' pedido_activo.pk %}" class="btn btn-info">
+                        <a href="{% url 'comedor:ver_pedido' pedido_activo.pk %}" class="btn btn-info">
                             <i class="fas fa-eye"></i> Ver Pedido
                         </a>
-                        <a href="{% url 'crear_pedido_mesa' mesa.pk %}" class="btn btn-primary">
+                        <a href="{% url 'comedor:crear_pedido_mesa' mesa.pk %}" class="btn btn-primary">
                             <i class="fas fa-edit"></i> Editar Pedido
                         </a>
                         {% else %}
-                        <a href="{% url 'crear_pedido_mesa' mesa.pk %}" class="btn btn-primary">
+                        <a href="{% url 'comedor:crear_pedido_mesa' mesa.pk %}" class="btn btn-primary">
                             <i class="fas fa-utensils"></i> Crear Pedido
                         </a>
                         {% endif %}
-                        <a href="{% url 'liberar_mesa' mesa.pk %}" class="btn btn-warning">
+                        <a href="{% url 'comedor:liberar_mesa' mesa.pk %}" class="btn btn-warning">
                             <i class="fas fa-door-open"></i> Liberar Mesa
                         </a>
                         {% endif %}
-                        <a href="{% url 'editar_mesa' mesa.pk %}" class="btn btn-warning">
+                        <a href="{% url 'comedor:editar_mesa' mesa.pk %}" class="btn btn-warning">
                             <i class="fas fa-edit"></i> Editar
                         </a>
-                        <a href="{% url 'eliminar_mesa' mesa.pk %}" class="btn btn-danger">
+                        <a href="{% url 'comedor:eliminar_mesa' mesa.pk %}" class="btn btn-danger">
                             <i class="fas fa-trash"></i> Eliminar
                         </a>
-                        <a href="{% url 'listar_mesas' %}" class="btn btn-secondary">
+                        <a href="{% url 'comedor:listar_mesas' %}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Volver
                         </a>
                     </div>

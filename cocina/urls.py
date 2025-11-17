@@ -1,6 +1,8 @@
 from django.urls import path
 from . import views
 
+app_name = 'cocina'
+
 urlpatterns = [
     # Vista principal de cocina
     path('', views.CocinaIndexView.as_view(), name='cocina_index'),
