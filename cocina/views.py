@@ -57,7 +57,7 @@ class ItemDetailView(DetailView):
     context_object_name = 'item'
 
 
-class ItemCreateView(CreateView):
+class ItemCreateView(LoginRequiredMixin, CreateView):
     model = Item
     form_class = ItemForm
     template_name = 'form_item.html'
@@ -76,7 +76,7 @@ class ItemCreateView(CreateView):
         return super().form_valid(form)
 
 
-class ItemUpdateView(UpdateView):
+class ItemUpdateView(LoginRequiredMixin, UpdateView):
     model = Item
     form_class = ItemForm
     template_name = 'form_item.html'
@@ -87,6 +87,7 @@ class ItemUpdateView(UpdateView):
         return super().form_valid(form)
 
 
+@login_required
 def item_delete(request, pk):
     # SELECT * FROM cocina_item WHERE id = pk LIMIT 1
     item = get_object_or_404(Item, pk=pk)
@@ -106,7 +107,7 @@ class CategoriaItemListView(ListView):
     context_object_name = 'categorias'
 
 
-class CategoriaItemCreateView(CreateView):
+class CategoriaItemCreateView(LoginRequiredMixin, CreateView):
     model = CategoriaItem
     form_class = CategoriaItemForm
     template_name = 'form_categoria.html'
@@ -117,7 +118,7 @@ class CategoriaItemCreateView(CreateView):
         return super().form_valid(form)
 
 
-class CategoriaItemUpdateView(UpdateView):
+class CategoriaItemUpdateView(LoginRequiredMixin, UpdateView):
     model = CategoriaItem
     form_class = CategoriaItemForm
     template_name = 'form_categoria.html'
@@ -128,6 +129,7 @@ class CategoriaItemUpdateView(UpdateView):
         return super().form_valid(form)
 
 
+@login_required
 def categoria_delete(request, pk):
     # SELECT * FROM cocina_categoriaitem WHERE id = pk LIMIT 1
     categoria = get_object_or_404(CategoriaItem, pk=pk)
@@ -136,6 +138,7 @@ def categoria_delete(request, pk):
     messages.success(request, 'Categoría eliminada exitosamente.')
     return redirect('listar_categorias')
 
+@login_required
 def agregar_item(request, categoria_pk):
     categoria = get_object_or_404(CategoriaItem, pk=categoria_pk)
     if request.method == 'POST':

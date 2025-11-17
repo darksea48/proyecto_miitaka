@@ -46,7 +46,7 @@ class MesaListView(ListView):
         return queryset
 
 
-class MesaCreateView(CreateView):
+class MesaCreateView(LoginRequiredMixin, CreateView):
     model = Mesa
     form_class = MesaForm
     template_name = 'form_mesa.html'
@@ -57,7 +57,7 @@ class MesaCreateView(CreateView):
         return super().form_valid(form)
 
 
-class MesaUpdateView(UpdateView):
+class MesaUpdateView(LoginRequiredMixin, UpdateView):
     model = Mesa
     form_class = MesaForm
     template_name = 'form_mesa.html'
@@ -67,6 +67,7 @@ class MesaUpdateView(UpdateView):
         messages.success(self.request, 'Mesa actualizada exitosamente.')
         return super().form_valid(form)
 
+@login_required
 def liberar_mesa(request, pk):
     mesa = get_object_or_404(Mesa, pk=pk) # -> SELECT * FROM comedor_mesa WHERE id = pk LIMIT 1
     
@@ -81,6 +82,7 @@ def liberar_mesa(request, pk):
     messages.success(request, f'Mesa {mesa.numero} liberada exitosamente. Ahora está disponible.')
     return redirect('listar_mesas')
 
+@login_required
 def mesa_delete(request, pk):
     # SELECT * FROM comedor_mesa WHERE id = pk LIMIT 1
     mesa = get_object_or_404(Mesa, pk=pk)
@@ -113,6 +115,7 @@ class MesaDetailView(DetailView):
         context['pedido_activo'] = pedido_activo
         return context
 
+@login_required
 def reservar_mesa(request, pk):
     
     mesa = get_object_or_404(Mesa, pk=pk) # -> SELECT * FROM comedor_mesa WHERE id = pk LIMIT 1
@@ -128,7 +131,7 @@ def reservar_mesa(request, pk):
         if form.is_valid():
             reserva = form.save(commit=False)
             reserva.mesa = mesa
-            # reserva.creada_por = request.user
+            reserva.creada_por = request.user
             reserva.save()  # Esto automáticamente cambiará el estado de la mesa a 'reservada'
             messages.success(request, f'Mesa {mesa.numero} reservada exitosamente. Estado actualizado a: Reservada')
             return redirect('listar_mesas')
@@ -144,6 +147,7 @@ def reservar_mesa(request, pk):
         form.fields['mesa'].required = False
     return render(request, 'form_reserva.html', {'form': form, 'mesa': mesa})
 
+@login_required
 def recepcionar_mesa(request, pk):
     mesa = get_object_or_404(Mesa, pk=pk) # -> SELECT * FROM comedor_mesa WHERE id = pk LIMIT 1
     
@@ -208,7 +212,7 @@ class ClienteDetailView(DetailView):
     context_object_name = 'cliente'
 
 
-class ClienteCreateView(CreateView):
+class ClienteCreateView(LoginRequiredMixin, CreateView):
     model = Cliente
     form_class = ClienteForm
     template_name = 'form_cliente.html'
@@ -219,7 +223,7 @@ class ClienteCreateView(CreateView):
         return super().form_valid(form)
 
 
-class ClienteUpdateView(UpdateView):
+class ClienteUpdateView(LoginRequiredMixin, UpdateView):
     model = Cliente
     form_class = ClienteForm
     template_name = 'form_cliente.html'
@@ -230,12 +234,14 @@ class ClienteUpdateView(UpdateView):
         return super().form_valid(form)
 
 
+@login_required
 def cliente_delete(request, pk):
     cliente = get_object_or_404(Cliente, pk=pk) # -> SELECT * FROM comedor_cliente WHERE id = pk LIMIT 1
     cliente.delete() # -> DELETE FROM comedor_cliente WHERE id = pk
     messages.success(request, 'Cliente eliminado exitosamente.')
     return redirect('listar_clientes')
 
+@login_required
 def crear_reserva_cliente(request, pk):
     cliente = get_object_or_404(Cliente, pk=pk) # -> SELECT * FROM comedor_cliente WHERE id = pk LIMIT 1
     if request.method == 'POST':
@@ -256,7 +262,7 @@ def crear_reserva_cliente(request, pk):
                 form.fields['cliente'].required = False
                 return render(request, 'form_reserva.html', {'form': form, 'cliente': cliente})
             
-            # reserva.creada_por = request.user
+            reserva.creada_por = request.user
             reserva.save() # -> INSERT INTO comedor_reserva (...) VALUES (...) y actualiza estado de mesa
             messages.success(request, f'Reserva creada exitosamente para el cliente. Mesa {mesa.numero} reservada.')
             return redirect('ver_cliente', pk=cliente.pk)
@@ -311,14 +317,14 @@ class ReservaDetailView(DetailView):
     context_object_name = 'reserva'
 
 
-class ReservaCreateView(CreateView):
+class ReservaCreateView(LoginRequiredMixin, CreateView):
     model = Reserva
     form_class = ReservaForm
     template_name = 'form_reserva.html'
     success_url = reverse_lazy('listar_reservas')
     
     def form_valid(self, form):
-        # form.instance.creada_por = self.request.user
+        form.instance.creada_por = self.request.user
         mesa = form.cleaned_data.get('mesa')
         
         # Validar que la mesa esté disponible
@@ -331,7 +337,7 @@ class ReservaCreateView(CreateView):
         return response
 
 
-class ReservaUpdateView(UpdateView):
+class ReservaUpdateView(LoginRequiredMixin, UpdateView):
     model = Reserva
     form_class = ReservaForm
     template_name = 'form_reserva.html'
@@ -341,6 +347,7 @@ class ReservaUpdateView(UpdateView):
         messages.success(self.request, 'Reserva actualizada exitosamente.')
         return super().form_valid(form)
 
+@login_required
 def reserva_cancel(request, pk):
     # SELECT * FROM comedor_reserva WHERE id = pk LIMIT 1
     reserva = get_object_or_404(Reserva, pk=pk)
@@ -351,6 +358,7 @@ def reserva_cancel(request, pk):
     
     return redirect('listar_reservas')
 
+@login_required
 def reserva_delete(request, pk):
     # SELECT * FROM comedor_reserva WHERE id = pk LIMIT 1
     reserva = get_object_or_404(Reserva, pk=pk)
@@ -375,6 +383,7 @@ def reserva_delete(request, pk):
     
     return redirect('listar_reservas')
 
+@login_required
 def confirmar_reserva(request, pk):
     # SELECT * FROM comedor_reserva WHERE id = pk LIMIT 1
     reserva = get_object_or_404(Reserva, pk=pk)
@@ -440,18 +449,18 @@ class PedidoDetailView(DetailView):
         return context
 
 
-class PedidoCreateView(CreateView):
+class PedidoCreateView(LoginRequiredMixin, CreateView):
     model = Pedido
     form_class = PedidoForm
     template_name = 'form_pedido.html'
     success_url = reverse_lazy('listar_pedidos')
     
     def form_valid(self, form):
-        # form.instance.atendido_por = self.request.user
+        form.instance.atendido_por = self.request.user
         messages.success(self.request, 'Pedido creado exitosamente.')
         return super().form_valid(form)
 
-class PedidoUpdateView(UpdateView):
+class PedidoUpdateView(LoginRequiredMixin, UpdateView):
     model = Pedido
     form_class = PedidoForm
     template_name = 'form_pedido.html'
@@ -462,6 +471,7 @@ class PedidoUpdateView(UpdateView):
         return super().form_valid(form)
 
 
+@login_required
 def pedido_delete(request, pk):
     # SELECT * FROM comedor_pedido WHERE id = pk LIMIT 1
     pedido = get_object_or_404(Pedido, pk=pk)
@@ -470,6 +480,7 @@ def pedido_delete(request, pk):
     messages.success(request, 'Pedido eliminado exitosamente.')
     return redirect('listar_pedidos')
 
+@login_required
 def crear_pedido_mesa(request, mesa_id):
     mesa = get_object_or_404(Mesa, pk=mesa_id)  # -> SELECT * FROM comedor_mesa WHERE id = mesa_id LIMIT 1
     
@@ -503,7 +514,7 @@ def crear_pedido_mesa(request, mesa_id):
             pedido = form.save(commit=False)
             pedido.mesa = mesa
             pedido.cliente = cliente
-            # pedido.atendido_por = request.user
+            pedido.atendido_por = request.user
             pedido.save()  # -> INSERT/UPDATE comedor_pedido
             
             if pedido_existente:
@@ -540,6 +551,7 @@ def crear_pedido_mesa(request, mesa_id):
 # VISTAS PARA ITEMS DE PEDIDOS
 # ============================================
 
+@login_required
 def agregar_item_pedido(request, pedido_id):
     """Vista para agregar items a un pedido existente"""
     pedido = get_object_or_404(Pedido, pk=pedido_id)  # -> SELECT * FROM comedor_pedido WHERE id = pedido_id LIMIT 1
@@ -568,6 +580,7 @@ def agregar_item_pedido(request, pedido_id):
     })
 
 
+@login_required
 def editar_item_pedido(request, detalle_id):
     """Vista para editar un item del pedido"""
     detalle = get_object_or_404(DetallePedido, pk=detalle_id)  # -> SELECT * FROM comedor_detallepedido WHERE id = detalle_id LIMIT 1
@@ -596,6 +609,7 @@ def editar_item_pedido(request, detalle_id):
         'detalle': detalle
     })
 
+@login_required
 def eliminar_item_pedido(request, detalle_id):
     """Vista para eliminar un item del pedido"""
     detalle = get_object_or_404(DetallePedido, pk=detalle_id)  # -> SELECT * FROM comedor_detallepedido WHERE id = detalle_id LIMIT 1

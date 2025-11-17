@@ -80,7 +80,9 @@ class Reserva(models.Model):
         ordering = ['-fecha_reserva']
     
     def __str__(self):
-        return f"Reserva Mesa {self.mesa.numero} - {self.cliente.nombre} ({self.fecha_reserva.strftime('%d/%m/%Y %H:%M')})"
+        cliente_info = self.cliente.nombre if self.cliente else 'Cliente no asignado'
+        mesa_info = f"Mesa {self.mesa.numero}" if self.mesa else "Mesa no asignada"
+        return f"Reserva {mesa_info} - {cliente_info} ({self.fecha_reserva.strftime('%d/%m/%Y %H:%M')})"
     
     def save(self, *args, **kwargs):
         """Actualiza el estado de la mesa al guardar la reserva"""
