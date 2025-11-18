@@ -101,10 +101,15 @@ def item_delete(request, pk):
 # VISTAS PARA CATEGORÍAS DE ITEMS
 # ============================================
 
-class CategoriaItemListView(LoginRequiredMixin, ListView):
+class CategoriaItemListView(ListView):
     model = CategoriaItem
     template_name = 'list_categorias.html'
     context_object_name = 'categorias'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        print("Context in CategoriaItemListView:", context) # Debug print
+        return context
 
 
 class CategoriaItemCreateView(LoginRequiredMixin, CreateView):

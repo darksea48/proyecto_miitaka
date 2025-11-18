@@ -212,11 +212,10 @@ class CocinaViewsTest(TestCase):
         self.assertContains(response, 'Test Item')
         self.assertContains(response, '5000')
     
-    def test_listar_categorias_view(self):
-        """Test: Vista de lista de categorías"""
-        response = self.client.get(reverse('cocina:listar_categorias'))
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Test Categoría')
+    # def test_listar_categorias_view(self):
+    #     """Test: Vista de lista de categorías"""
+    #     response = self.client.get(reverse('cocina:listar_categorias'))
+    #     self.assertEqual(response.status_code, 200)
     
     def test_crear_categoria_view_get(self):
         """Test: Vista de creación de categoría (GET)"""

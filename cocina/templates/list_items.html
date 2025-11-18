@@ -6,7 +6,7 @@
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2><i class="fas fa-utensils"></i> {{ titulo }}</h2>
-        <a href="{% url 'crear_item' %}" class="btn btn-success">
+        <a href="{% url 'cocina:crear_item' %}" class="btn btn-success">
             <i class="fas fa-plus"></i> {{ texto_boton_crear }}
         </a>
     </div>
@@ -14,7 +14,7 @@
     <!-- Filtros -->
     <div class="mb-3">
         <div class="btn-group" role="group">
-            <a href="{% url 'listar_items' %}" class="btn btn-sm btn-outline-primary {% if not request.GET.categoria and not request.GET.disponible %}active{% endif %}">Todos</a>
+            <a href="{% url 'cocina:listar_items' %}" class="btn btn-sm btn-outline-primary {% if not request.GET.categoria and not request.GET.disponible %}active{% endif %}">Todos</a>
             <a href="?disponible=true" class="btn btn-sm btn-outline-success {% if request.GET.disponible == 'true' %}active{% endif %}">Disponibles</a>
             <a href="?disponible=false" class="btn btn-sm btn-outline-danger {% if request.GET.disponible == 'false' %}active{% endif %}">No Disponibles</a>
         </div>
@@ -56,9 +56,9 @@
                     </div>
                     <div class="card-footer">
                         <div class="btn-group w-100" role="group">
-                            <a href="{% url 'ver_item' item.pk %}" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a>
-                            <a href="{% url 'editar_item' item.pk %}" class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></a>
-                            <a href="{% url 'eliminar_item' item.pk %}" class="btn btn-sm btn-danger eliminar-item"><i class="fas fa-trash"></i></a>
+                            <a href="{% url 'cocina:ver_item' item.pk %}" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a>
+                            <a href="{% url 'cocina:editar_item' item.pk %}" class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></a>
+                            <a href="{% url 'cocina:eliminar_item' item.pk %}" class="btn btn-sm btn-danger eliminar-item"><i class="fas fa-trash"></i></a>
                         </div>
                     </div>
                 </div>

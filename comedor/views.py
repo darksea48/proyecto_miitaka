@@ -32,7 +32,7 @@ class MesaListView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['titulo'] = 'Gestión de Mesas'
         context['tipo_vista'] = 'mesas'
-        context['url_crear'] = reverse_lazy('crear_mesa')
+        context['url_crear'] = reverse_lazy('comedor:crear_mesa')
         context['texto_boton_crear'] = 'Nueva Mesa'
         return context
     
@@ -190,7 +190,7 @@ class ClienteListView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['titulo'] = 'Gestión de Clientes'
         context['tipo_vista'] = 'clientes'
-        context['url_crear'] = reverse_lazy('crear_cliente')
+        context['url_crear'] = reverse_lazy('comedor:crear_cliente')
         context['texto_boton_crear'] = 'Nuevo Cliente'
         return context
     
