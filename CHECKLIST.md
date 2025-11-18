@@ -253,13 +253,13 @@
 - [x] 0 errores en `python manage.py check`
 
 ### ✅ Datos de Prueba
-- [ ] Superusuario creado
-- [ ] Categorías de items creadas
-- [ ] Items de ejemplo creados (platos, bebidas, cocteles, etc.)
-- [ ] Mesas registradas
-- [ ] Clientes de prueba registrados
-- [ ] Reservas de ejemplo creadas
-- [ ] Pedidos de prueba creados
+- [x] Superusuario creado
+- [x] Categorías de items creadas
+- [x] Items de ejemplo creados (platos, bebidas, cocteles, etc.)
+- [x] Mesas registradas
+- [x] Clientes de prueba registrados
+- [x] Reservas de ejemplo creadas
+- [x] Pedidos de prueba creados
 
 ---
 
