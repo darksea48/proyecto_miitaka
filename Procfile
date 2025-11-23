@@ -1,0 +1,1 @@
+web: gunicorn Proy_Itaka.wsgi
