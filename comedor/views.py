@@ -448,7 +448,6 @@ class PedidoDetailView(LoginRequiredMixin, DetailView):
         context['detalles'] = self.object.detalles.all()
         return context
 
-
 class PedidoCreateView(LoginRequiredMixin, CreateView):
     model = Pedido
     form_class = PedidoForm
@@ -522,7 +521,7 @@ def crear_pedido_mesa(request, mesa_id):
             else:
                 messages.success(request, f'Pedido creado exitosamente para la Mesa {mesa.numero} - Cliente: {cliente.nombre}.')
             
-            return redirect('ver_pedido', pk=pedido.pk)
+            return redirect('comedor:ver_pedido', pk=pedido.pk)
         else:
             messages.error(request, 'Por favor, corrige los errores del formulario.')
     else:
@@ -568,7 +567,7 @@ def agregar_item_pedido(request, pedido_id):
             pedido.calcular_total()
             
             messages.success(request, f'Item "{detalle.item.nombre}" agregado al pedido.')
-            return redirect('ver_pedido', pk=pedido.pk)
+            return redirect('comedor:ver_pedido', pk=pedido.pk)
         else:
             messages.error(request, 'Por favor, corrige los errores del formulario.')
     else:
@@ -615,17 +614,11 @@ def eliminar_item_pedido(request, detalle_id):
     detalle = get_object_or_404(DetallePedido, pk=detalle_id)  # -> SELECT * FROM comedor_detallepedido WHERE id = detalle_id LIMIT 1
     pedido = detalle.pedido
     
-    if request.method == 'POST':
-        item_nombre = detalle.item.nombre
-        detalle.delete()  # -> DELETE FROM comedor_detallepedido WHERE id = detalle_id
+    item_nombre = detalle.item.nombre
+    detalle.delete()  # -> DELETE FROM comedor_detallepedido WHERE id = detalle_id
         
-        # Recalcular total del pedido
-        pedido.calcular_total()
+    # Recalcular total del pedido
+    pedido.calcular_total()
         
-        messages.success(request, f'Item "{item_nombre}" eliminado del pedido.')
-        return redirect('ver_pedido', pk=pedido.pk)
-    
-    return render(request, 'confirmar_eliminar_item.html', {
-        'detalle': detalle,
-        'pedido': pedido
-    })
+    messages.success(request, f'Item "{item_nombre}" eliminado del pedido.')
+    return redirect('comedor:ver_pedido', pk=pedido.pk)

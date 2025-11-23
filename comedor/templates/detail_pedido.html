@@ -123,9 +123,11 @@
                                             <a href="{% url 'comedor:editar_item_pedido' detalle.id %}" class="btn btn-warning" title="Editar">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <a href="{% url 'comedor:eliminar_item_pedido' detalle.id %}" class="btn btn-danger" id="btn-eliminaritemdetalle" title="Eliminar">
+                                            
+                                            <a href="{% url 'comedor:eliminar_item_pedido' detalle.id %}" class="btn btn-danger btn-sm btn-eliminaritem" title="Eliminar">
                                                 <i class="fas fa-trash-alt"></i>
                                             </a>
+                                            
                                         </div>
                                     </td>
                                 </tr>
@@ -160,7 +162,7 @@
 {% block scripts %}
 <script>
     $(document).ready(function() {
-        $('#btn-eliminaritemdetalle').on('click', function(e) {
+        $('.btn-eliminaritem').on('click', function(e) {
             e.preventDefault();
             Swal.fire({
                 title: '¿Estás seguro?',

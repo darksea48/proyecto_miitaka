@@ -11,10 +11,10 @@
     <div class="container">
         <div class="row justify-content-center text-center mt-5">
             <div class="col-md-4">
-                <a id="a-comedor" href="{% url 'comedor_index' %}" class="w-100 mb-3 text-decoration-none"><div class="card-zoom card text-white"><span class="material-symbols-outlined">table_restaurant</span> Comedor</div></a>
+                <a id="a-comedor" href="{% url 'comedor:comedor_index' %}" class="w-100 mb-3 text-decoration-none"><div class="card-zoom card text-white"><span class="material-symbols-outlined">table_restaurant</span> Comedor</div></a>
             </div>
             <div class="col-md-4">
-                <a id="a-cocina" href="{% url 'cocina_index' %}" class="w-100 mb-3 text-decoration-none"><div class="card-zoom card text-white"><span class="material-symbols-outlined">chef_hat</span> Cocina</div></a>
+                <a id="a-cocina" href="{% url 'cocina:cocina_index' %}" class="w-100 mb-3 text-decoration-none"><div class="card-zoom card text-white"><span class="material-symbols-outlined">chef_hat</span> Cocina</div></a>
             </div>
             <div class="col-md-4">
                 <a id="a-caja" href="#" class="w-100 mb-3 text-decoration-none"><div class="card-zoom card text-white"><span class="material-symbols-outlined">point_of_sale</span> Caja</div></a>
@@ -24,4 +24,20 @@
 
     </div>
 </div>
+{% endblock %}
+{% block scripts %}
+<script>
+    // Agregar cualquier script específico para esta página si es necesario
+    $(document).ready(function() {
+        $("#a-caja").click(function(e) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'info',
+                title: 'En construcción',
+                text: 'La sección de Caja está en desarrollo y estará disponible próximamente.',
+                confirmButtonText: 'Entendido'
+            });
+        });
+    });
+</script>
 {% endblock %}

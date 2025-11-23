@@ -58,8 +58,10 @@ Esta separación permite:
 - Creación de pedidos por mesa
 - Detalle de pedidos con múltiples items del menú
 - Cálculo automático de subtotales y totales
-- Estados de pedido (Pendiente, En Preparación, Listo, Servido, Pagado)
+- Estados de pedido simplificados (Pendiente, En Curso, Cuenta Solicitada, Pagado, Cancelado)
+- Tipos de pedido (Comedor, Para Llevar, Delivery)
 - Observaciones personalizadas por item
+- CRUD completo para items dentro de pedidos
 
 ### 🍳 Módulo Cocina
 

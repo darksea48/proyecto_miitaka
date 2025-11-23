@@ -114,9 +114,8 @@ class Pedido(models.Model):
     """Modelo para gestionar los pedidos"""
     ESTADO_CHOICES = [
         ('pendiente', 'Pendiente'),
-        ('en_preparacion', 'En Preparación'),
-        ('listo', 'Listo'),
-        ('servido', 'Servido'),
+        ('en_curso', 'En Curso'),
+        ('cuenta', 'Cuenta Solicitada'),
         ('pagado', 'Pagado'),
         ('cancelado', 'Cancelado'),
     ]

@@ -5,8 +5,8 @@
 - **Framework**: Django 5.2.8
 - **Base de Datos**: MySQL
 - **Python**: 3.13
-- **Versión**: 1.3
-- **Fecha**: Noviembre 2025
+- **Versión**: 1.4
+- **Fecha**: 23 de Noviembre 2025
 - **Estado**: Versión Beta - Funcional
 
 ---
@@ -64,7 +64,7 @@
   - [x] Usuario creador, timestamps
 - [x] **Pedido** - Gestión de pedidos
   - [x] Mesa FK, Cliente FK
-  - [x] Estados del pedido
+  - [x] Estados simplificados (pendiente, en_curso, cuenta, pagado, cancelado) - v1.4
   - [x] Total calculado automáticamente
   - [x] Usuario atendió, timestamps
   - [x] Campo tipo_pedido (comedor, llevar, delivery) - v1.3
@@ -249,6 +249,7 @@
 - [x] Migraciones de `comedor` creadas y aplicadas
   - [x] 0001_initial
   - [x] 0002_pedido_tipo_pedido_alter_reserva_cliente... (campo tipo_pedido) - v1.3
+  - [x] 0003_alter_pedido_estado (estados simplificados) - v1.4
 - [x] Base de datos `itaka_db` creada y sincronizada
 - [x] 0 errores en `python manage.py check`
 
@@ -637,7 +638,17 @@
 
 ## 📜 HISTORIAL DE VERSIONES
 
-### Versión 1.3 (17 de Noviembre, 2025) - ACTUAL
+### Versión 1.4 (23 de Noviembre, 2025) - ACTUAL
+**Mejoras y Correcciones:**
+- ✅ Estados de pedido simplificados (en_curso, cuenta en lugar de en_preparacion, listo, servido)
+- ✅ Migración 0003 aplicada
+- ✅ Corrección función eliminar_item_pedido (ahora funciona correctamente)
+- ✅ Templates: Corrección de URLs con namespace comedor:
+- ✅ Eliminación de template duplicado list_categorias.html
+- ✅ Mejora UX: Botón Caja con alerta de "En construcción"
+- ✅ Solo pedidos pendientes pueden ser eliminados
+
+### Versión 1.3 (17 de Noviembre, 2025)
 **Mejoras Críticas Implementadas:**
 - ✅ Campo tipo_pedido (comedor/llevar/delivery)
 - ✅ Validación reservas duplicadas (±2h)
@@ -671,4 +682,4 @@
 
 ---
 
-**Última actualización del documento**: 17 de Noviembre, 2025
+**Última actualización del documento**: 23 de Noviembre, 2025
