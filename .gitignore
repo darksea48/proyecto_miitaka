@@ -1,5 +1,29 @@
-__pycache__
-venv
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Entorno virtual
+venv/
+
+# Django
+staticfiles/
+db.sqlite3
+*.log
+
+# Variables de entorno
+.env
+.env.*
+
+# Herramientas AI/IDE
+.claude/
+.codebuddy/
+.continue/
+.junie/
+.kiro/
+skills-lock.json
+
+# Documentos del bootcamp (no parte del proyecto)
 Rúbrica Técnica Python.docx.pdf
 INFORME_M8_AE2_ABP.md
 EVALUACION_RUBRICA.md
