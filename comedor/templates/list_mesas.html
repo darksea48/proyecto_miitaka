@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestión de Mesas{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-chair"></i> Gestión de Mesas</h2>
+        <a href="{% url 'comedor:crear_mesa' %}" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus"></i> Nueva Mesa
+        </a>
+    </div>
+
+    <div class="row">
+        {% for mesa in mesas %}
+            <div class="col-sm-4 col-md-3 col-lg-2 mb-4">
+                <a href="{% url 'comedor:ver_mesa' mesa.pk %}" class="text-decoration-none">
+                    <div class="card h-100 {% if mesa.estado == 'disponible' %}border-success{% elif mesa.estado == 'ocupada' %}border-danger{% elif mesa.estado == 'reservada' %}border-warning{% else %}border-secondary{% endif %} text-center p-2">
+                        <div class="card-header text-center {% if mesa.estado == 'disponible' %}bg-success text-white{% elif mesa.estado == 'ocupada' %}bg-danger text-white{% elif mesa.estado == 'reservada' %}bg-warning{% else %}bg-secondary text-white{% endif %}">
+                            <h4 class="mb-0"><i class="fas fa-chair"></i> Mesa {{ mesa.numero }}</h4>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">
+                                <span class="badge {% if mesa.estado == 'disponible' %}bg-success{% elif mesa.estado == 'ocupada' %}bg-danger{% elif mesa.estado == 'reservada' %}bg-warning{% else %}bg-secondary{% endif %}">
+                                    {{ mesa.get_estado_display }}
+                                </span>
+                                <div class="row mt-2">
+                                    <div class="col-6 fw-bold datos-mesa"><i class="bi bi-people-fill"></i> {{ mesa.capacidad }}</div>
+                                    <div class="col-6 fw-bold datos-mesa"><i class="bi bi-geo-alt"></i> {{ mesa.get_ubicacion_display }}</div>
+                                </div>
+                                {% if mesa.estado == 'ocupada' %}
+                                <div class="mt-2">
+                                    <a href="{% url 'comedor:crear_pedido_mesa' mesa.pk %}" class="btn btn-primary btn-sm">Tomar pedido</a>
+                                </div>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> No hay mesas registradas aún.
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestión de Reservas{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-calendar-alt"></i> Gestión de Reservas</h2>
+        <a href="{% url 'comedor:crear_reserva' %}" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus"></i> Nueva Reserva
+        </a>
+    </div>
+
+    <div class="mb-3">
+        <div class="btn-group" role="group">
+            <a href="?estado=todas" class="btn btn-sm btn-outline-primary {% if not request.GET.estado or request.GET.estado == 'todas' %}active{% endif %}">Todas</a>
+            <a href="?estado=pendiente" class="btn btn-sm btn-outline-warning {% if request.GET.estado == 'pendiente' %}active{% endif %}">Pendientes</a>
+            <a href="?estado=confirmada" class="btn btn-sm btn-outline-success {% if request.GET.estado == 'confirmada' %}active{% endif %}">Confirmadas</a>
+            <a href="?estado=en_curso" class="btn btn-sm btn-outline-info {% if request.GET.estado == 'en_curso' %}active{% endif %}">En Curso</a>
+            <a href="?estado=completada" class="btn btn-sm btn-outline-secondary {% if request.GET.estado == 'completada' %}active{% endif %}">Completadas</a>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th><i class="fas fa-hashtag"></i> #</th>
+                    <th><i class="fas fa-user"></i> Cliente</th>
+                    <th><i class="fas fa-chair"></i> Mesa</th>
+                    <th><i class="fas fa-calendar-alt"></i> Fecha/Hora</th>
+                    <th><i class="fas fa-users"></i> Personas</th>
+                    <th><i class="fas fa-info-circle"></i> Estado</th>
+                    <th><i class="fas fa-cogs"></i> Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for reserva in reservas %}
+                    <tr>
+                        <td>{{ reserva.id }}</td>
+                        <td>{{ reserva.cliente.nombre }}</td>
+                        <td><span class="badge bg-primary">Mesa {{ reserva.mesa.numero }}</span></td>
+                        <td>{{ reserva.fecha_reserva|date:"d/m/Y H:i" }}</td>
+                        <td>{{ reserva.numero_personas }}</td>
+                        <td>
+                            <span class="badge {% if reserva.estado == 'pendiente' %}bg-warning{% elif reserva.estado == 'confirmada' %}bg-success{% elif reserva.estado == 'en_curso' %}bg-info{% elif reserva.estado == 'completada' %}bg-secondary{% elif reserva.estado == 'cancelada' %}bg-danger{% else %}bg-dark{% endif %}">
+                                {{ reserva.get_estado_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'comedor:ver_reserva' reserva.pk %}" class="btn btn-sm btn-info" title="Ver"><i class="fas fa-eye"></i></a>
+                                {% if reserva.estado == 'pendiente' %}
+                                    <a href="{% url 'comedor:confirmar_reserva' reserva.pk %}" class="btn btn-sm btn-success btn-confirmar-reserva" title="Confirmar"><i class="fas fa-check"></i></a>
+                                {% endif %}
+                                <a href="{% url 'comedor:editar_reserva' reserva.pk %}" class="btn btn-sm btn-warning" title="Editar"><i class="fas fa-edit"></i></a>
+                                <a href="{% url 'comedor:eliminar_reserva' reserva.pk %}" class="btn btn-sm btn-danger eliminar-item" title="Eliminar"><i class="fas fa-trash"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center">No hay reservas registradas.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if is_paginated %}
+    <nav>
+        <ul class="pagination pagination-sm justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link" href="?{% if request.GET.estado %}estado={{ request.GET.estado }}&{% endif %}page={{ page_obj.previous_page_number }}">Anterior</a></li>
+            {% endif %}
+            <li class="page-item disabled"><span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
+            {% if page_obj.has_next %}
+                <li class="page-item"><a class="page-link" href="?{% if request.GET.estado %}estado={{ request.GET.estado }}&{% endif %}page={{ page_obj.next_page_number }}">Siguiente</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        $('.btn-confirmar-reserva').click(function(event) {
+            event.preventDefault();
+            const url = $(this).attr('href');
+            swal.fire({
+                title: '¿Confirmar reserva?',
+                text: "¿Estás seguro de que deseas confirmar esta reserva?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, confirmar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = url;
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

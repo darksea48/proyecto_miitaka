@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.db.models import Count
+from django.utils.html import format_html
 from .models import Mesa, Cliente, Reserva, Pedido, DetallePedido
 
 
@@ -37,7 +39,6 @@ class MesaAdmin(admin.ModelAdmin):
     )
     
     def estado_badge(self, obj):
-        """Muestra el estado con color"""
         colors = {
             'disponible': 'green',
             'ocupada': 'red',
@@ -45,9 +46,8 @@ class MesaAdmin(admin.ModelAdmin):
             'mantenimiento': 'gray'
         }
         color = colors.get(obj.estado, 'black')
-        return f'<span style="color: {color}; font-weight: bold;">●</span> {obj.get_estado_display()}'
+        return format_html('<span style="color: {}; font-weight: bold;">●</span> {}', color, obj.get_estado_display())
     estado_badge.short_description = 'Estado Visual'
-    estado_badge.allow_tags = True
 
 
 @admin.register(Cliente)
@@ -73,15 +73,21 @@ class ClienteAdmin(admin.ModelAdmin):
         }),
     )
     
+    def get_queryset(self, request):
+        return super().get_queryset(request).annotate(
+            _total_reservas=Count('reservas', distinct=True),
+            _total_pedidos=Count('pedidos', distinct=True),
+        )
+
     def total_reservas(self, obj):
-        """Cuenta el total de reservas del Cliente"""
-        return obj.reservas.count()
+        return obj._total_reservas
     total_reservas.short_description = 'Reservas'
-    
+    total_reservas.admin_order_field = '_total_reservas'
+
     def total_pedidos(self, obj):
-        """Cuenta el total de pedidos del Cliente"""
-        return obj.pedidos.count()
+        return obj._total_pedidos
     total_pedidos.short_description = 'Pedidos'
+    total_pedidos.admin_order_field = '_total_pedidos'
 
 
 @admin.register(Reserva)

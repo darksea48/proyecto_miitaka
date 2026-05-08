@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.db.models import Count
+from django.utils.html import format_html
 from .models import CategoriaItem, Item
 
 
@@ -20,10 +22,15 @@ class CategoriaItemAdmin(admin.ModelAdmin):
         return '-'
     descripcion_corta.short_description = 'Descripción'
     
+    def get_queryset(self, request):
+        return super().get_queryset(request).annotate(
+            _total_items=Count('items'),
+        )
+
     def total_items(self, obj):
-        """Cuenta el total de items en la categoría"""
-        return obj.items.count()
+        return obj._total_items
     total_items.short_description = 'Items'
+    total_items.admin_order_field = '_total_items'
 
 
 @admin.register(Item)
@@ -46,9 +53,7 @@ class ItemAdmin(admin.ModelAdmin):
     )
     
     def disponibilidad_badge(self, obj):
-        """Muestra la disponibilidad con color"""
         if obj.disponible:
-            return '<span style="color: green; font-weight: bold;">✓ Disponible</span>'
-        return '<span style="color: red; font-weight: bold;">✗ No Disponible</span>'
+            return format_html('<span style="color: green; font-weight: bold;">✓ Disponible</span>')
+        return format_html('<span style="color: red; font-weight: bold;">✗ No Disponible</span>')
     disponibilidad_badge.short_description = 'Disponibilidad'
-    disponibilidad_badge.allow_tags = True
